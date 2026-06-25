@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Trash2, LayoutList, Grid3X3 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import pickerSvg from "@/imports/01Picker/svg-tw5ju0y2zu";
 import panelSvg from "@/imports/01/svg-a9oovbkrq5";
 import { Button } from "@andes/button";
@@ -8,12 +8,14 @@ import { Checkbox as AndesCheckbox } from "@andes/checkbox";
 import { TextField } from "@andes/textfield";
 import { DropdownNative, DropdownNativeItem } from "@andes/dropdown";
 import { Snackbar } from "@andes/snackbar";
+import { Tag } from "@andes/tag";
 import "@andes/button/index.scss";
 import "@andes/badge/index.scss";
 import "@andes/checkbox/index.scss";
 import "@andes/textfield/index.scss";
 import "@andes/dropdown/index.scss";
 import "@andes/snackbar/index.scss";
+import "@andes/tag/index.scss";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -25,7 +27,6 @@ const ALL_WEEKS = [
 ];
 
 type StatusKey = "revisado" | "agendado" | null;
-type Screen = "tabla" | "masivo";
 
 interface ScRow {
   sc: string;
@@ -131,19 +132,6 @@ const inputBase: React.CSSProperties = {
 
 // ─── Filter components ────────────────────────────────────────────────────────
 
-function FilterTag({ label, onRemove }: { label: string; onRemove: () => void }) {
-  return (
-    <div style={{ height:24, borderRadius:56, border:"1.2px solid rgba(0,0,0,0.25)", padding:"0 4px 0 8px", display:"flex", alignItems:"center", gap:2, flexShrink:0, backgroundColor:"white" }}>
-      <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px", whiteSpace:"nowrap" }}>{label}</p>
-      <button onClick={onRemove} style={{ width:16, height:16, background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, flexShrink:0 }}>
-        <svg viewBox="0 0 8.89625 8.89625" fill="none" style={{ width:8, height:8 }}>
-          <path d="M1 1l6.9 6.9M7.9 1L1 7.9" stroke="rgba(0,0,0,0.55)" strokeWidth="1.5" strokeLinecap="round"/>
-        </svg>
-      </button>
-    </div>
-  );
-}
-
 function OverflowPill({ items }: { items: string[] }) {
   const [hover, setHover] = useState(false);
   return (
@@ -170,6 +158,7 @@ function OverflowPill({ items }: { items: string[] }) {
     </div>
   );
 }
+
 
 function MultiSelectFilter({ label, open, options, selected, onOpen, onClose, onToggle, onClear, search, onSearch }: {
   label: string;
@@ -209,12 +198,14 @@ function MultiSelectFilter({ label, open, options, selected, onOpen, onClose, on
       ) : (
         <div style={{ display:"flex", alignItems:"center", gap:4 }}>
           {visiblePills.map(item => (
-            <FilterTag key={item} label={item} onRemove={() => onToggle(item)} />
+            <Tag
+              key={item}
+              label={item}
+              size="small"
+              onClose={() => onToggle(item)}
+            />
           ))}
           {overflowPills.length > 0 && <OverflowPill items={overflowPills} />}
-          <button onClick={onClear} style={{ background:"none", border:"none", cursor:"pointer", padding:"0 2px" }}>
-            <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.45)", lineHeight:"15px" }}>Limpiar</p>
-          </button>
         </div>
       )}
 
@@ -306,7 +297,7 @@ function MlLogo() {
 
 // ─── Global Header ─────────────────────────────────────────────────────────────
 
-function GlobalHeader({ screen, onToggleScreen }: { screen: Screen; onToggleScreen: () => void }) {
+function GlobalHeader() {
   return (
     <div style={{
       height: 56, flexShrink: 0,
@@ -326,24 +317,6 @@ function GlobalHeader({ screen, onToggleScreen }: { screen: Screen; onToggleScre
           </svg>
         </div>
         <MlLogo />
-      </div>
-
-      {/* Screen switcher */}
-      <div style={{ display:"flex", alignItems:"center", gap:2, backgroundColor:"rgba(0,0,0,0.08)", borderRadius:8, padding:3 }}>
-        {(["tabla","masivo"] as Screen[]).map(s => (
-          <button key={s} onClick={() => s !== screen && onToggleScreen()} style={{
-            display:"flex", alignItems:"center", gap:6, height:30, padding:"0 12px",
-            borderRadius:6, border:"none", cursor: s === screen ? "default" : "pointer",
-            backgroundColor: s === screen ? "white" : "transparent",
-            boxShadow: s === screen ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
-            transition:"all 0.15s",
-          }}>
-            {s === "tabla" ? <Grid3X3 size={14} color={s === screen ? "rgba(0,0,0,0.9)" : "rgba(0,0,0,0.55)"}/> : <LayoutList size={14} color={s === screen ? "rgba(0,0,0,0.9)" : "rgba(0,0,0,0.55)"}/>}
-            <span style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:13, fontWeight: s === screen ? 600 : 400, color: s === screen ? "rgba(0,0,0,0.9)" : "rgba(0,0,0,0.55)" }}>
-              {s === "tabla" ? "Vista tabla" : "Agendamiento masivo"}
-            </span>
-          </button>
-        ))}
       </div>
 
       <div style={{ display:"flex", flex:"1 0 0", gap:24, alignItems:"center", justifyContent:"flex-end", minWidth:0 }}>
@@ -596,77 +569,6 @@ function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, r
   );
 }
 
-// ─── Tabla masivo (compacta, sin expand, con pills siempre visibles) ───────────
-
-function MasivoTable({ rows, activeWeeks, onCellClick, revisadoSet, agendadoSet }: {
-  rows: ScRow[];
-  activeWeeks: number[];
-  onCellClick: (sc:string, weekNum:number) => void;
-  revisadoSet: Set<string>;
-  agendadoSet: Set<string>;
-}) {
-  const numCols = activeWeeks.length;
-
-  return (
-    <div style={{ width:"100%", border:"1px solid #EDEDED", borderRadius:"6px 6px 0 0", overflow:"hidden" }}>
-      <div style={{ display:"flex", backgroundColor:"#e5e5e5", borderBottom:"1px solid rgba(0,0,0,0.25)" }}>
-        <div style={{ width:SC_COL, flexShrink:0, padding:"10px 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"center", borderTopLeftRadius:6 }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Service center</p>
-        </div>
-        {activeWeeks.map((wn,i) => {
-          const wk = ALL_WEEKS.find(w => w.num === wn)!;
-          return (
-            <div key={wn} style={{ flex:1, padding:"10px 24px", borderRight: i < numCols-1 ? "1px solid #EDEDED" : "none", borderTopRightRadius: i === numCols-1 ? 6 : 0, display:"flex", flexDirection:"column", gap:4, justifyContent:"center" }}>
-              <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Semana {wn}</p>
-              <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.55)", lineHeight:"15px" }}>{wk.dates}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      {rows.map((row, ri) => {
-        const isLast = ri === rows.length - 1;
-        return (
-          <div key={row.sc} style={{ display:"flex", borderBottom: isLast ? "none" : "1px solid #EDEDED" }}>
-            <div style={{ width:SC_COL, flexShrink:0, height:ROW_H, padding:"0 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"center", backgroundColor:"white" }}>
-              <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>{row.sc}</p>
-            </div>
-
-            {activeWeeks.map((wn, ci) => {
-              const wi = wn - 1;
-              const val = row.vals[wi];
-              const key = `${row.sc}-${wn}`;
-              const status: StatusKey = agendadoSet.has(key) ? "agendado" : revisadoSet.has(key) ? "revisado" : row.statuses[wi];
-              const cfg = status ? STATUS_CFG[status] : null;
-
-              return (
-                <div key={wn} onClick={() => onCellClick(row.sc, wn)} style={{
-                  flex:1, height:ROW_H, padding:"0 24px",
-                  borderRight: ci < numCols-1 ? "1px solid #EDEDED" : "none",
-                  display:"flex", alignItems:"center", gap:8,
-                  backgroundColor:"white", cursor:"pointer", transition:"background 0.1s",
-                }}
-                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#F7FBFF")}
-                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = "white")}
-                >
-                  <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:18, color:"rgba(0,0,0,0.9)", lineHeight:"22px", flex:1 }}>{val}</p>
-                  {cfg ? (
-                    <Pill color={status === "agendado" ? "positive" : "informative"} hierarchy="quiet" style={{ flexShrink:0 }}>
-                      {cfg.label}
-                    </Pill>
-                  ) : (
-                    <Pill color="neutral" hierarchy="quiet" style={{ flexShrink:0 }}>PENDIENTE</Pill>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 // ─── Confirm Masivo Modal ────────────────────────────────────────────────────
 
 function ConfirmMasivoModal({ weeksLabel, scCount, onConfirm, onCancel }: {
@@ -849,25 +751,13 @@ function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemov
       </div>
 
       <div style={{ border:"1px solid #EDEDED", borderRadius:6, overflow:"hidden" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:12, padding:"8px 16px 0", backgroundColor:"#fafafa", borderBottom:"1px solid #EDEDED" }}>
-          <div style={{ width:120, flexShrink:0 }}>
-            <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.55)", lineHeight:"15px" }}>Ciclo</p>
-          </div>
-          <div style={{ width:96, flexShrink:0 }}>
-            <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.55)", lineHeight:"15px" }}>ETA</p>
-          </div>
-          <div style={{ display:"flex", gap:8 }}>
-            {DAYS_HDR.map(d => (
-              <div key={d} style={{ width:48, textAlign:"center" }}>
-                <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.55)", lineHeight:"15px" }}>{d}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {rows.map((row, ri) => (
-          <div key={row.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 16px", borderBottom: ri < rows.length-1 ? "1px solid #EDEDED" : "none", backgroundColor: readOnly ? "#fafafa" : "white" }}>
-            <div style={{ width:120, flexShrink:0 }}>
+          <div key={row.id} style={{
+            display:"flex", alignItems:"flex-end", gap:16, padding:"8px 16px",
+            borderBottom: ri < rows.length-1 ? "1px solid #EDEDED" : "none",
+            backgroundColor: readOnly ? "#fafafa" : "white",
+          }}>
+            <div style={{ width:174, flexShrink:0 }}>
               <DropdownNative
                 label="Ciclo"
                 value={row.ciclo}
@@ -877,7 +767,7 @@ function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemov
                 {CICLO_OPTS.map(opt => <DropdownNativeItem key={opt} value={opt} title={opt} />)}
               </DropdownNative>
             </div>
-            <div style={{ width:96, flexShrink:0 }}>
+            <div style={{ width:174, flexShrink:0 }}>
               <TextField
                 label="ETA"
                 value={row.eta}
@@ -886,11 +776,11 @@ function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemov
                 onChange={e => onRowChange(row.id, { eta: formatEta((e.target as HTMLInputElement).value) })}
               />
             </div>
-            <div style={{ display:"flex", gap:8 }}>
-              {DAYS_HDR.map((_, di) => (
-                <div key={di} style={{ width:48, flexShrink:0 }}>
+            <div style={{ display:"flex", gap:16 }}>
+              {DAYS_HDR.map((d, di) => (
+                <div key={di} style={{ width:54, flexShrink:0 }}>
                   <TextField
-                    srLabel={DAYS_HDR[di]}
+                    label={d}
                     value={String(row.days[di] ?? 0)}
                     disabled={readOnly}
                     onChange={e => {
@@ -904,7 +794,7 @@ function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemov
             </div>
             {!readOnly && ri > 0 ? (
               <button onClick={() => onRemoveRow(row.id)}
-                style={{ background:"none", border:"none", cursor:"pointer", padding:4, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", borderRadius:4, transition:"background 0.12s" }}
+                style={{ background:"none", border:"none", cursor:"pointer", padding:4, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", borderRadius:4, marginBottom:8 }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.05)")}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
               >
@@ -1045,7 +935,6 @@ function Panel({ sc, weekNum, onClose, isRevisado, isAgendado, onMarkRevisado, o
 // ─── App ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [screen,        setScreen]        = useState<Screen>("tabla");
   const [activeWeeks,   setActiveWeeks]   = useState<number[]>([1,2,3,4]);
   const [draftWeeks,    setDraftWeeks]    = useState<Set<number>>(new Set([1,2,3,4]));
   const [pickerOpen,    setPickerOpen]    = useState(false);
@@ -1150,12 +1039,6 @@ export default function App() {
     executeAgendar(keysToAgendar, scCount, `${scCount} Service centers`);
   }
 
-  function handleToggleScreen() {
-    setScreen(s => s === "tabla" ? "masivo" : "tabla");
-    setPanelOpen(false);
-    setPickerOpen(false);
-  }
-
   const label = weekLabel(activeWeeks);
   const hasRevisado = revisadoSet.size > 0;
   const revisadoScCount = new Set([...revisadoSet].map(k => k.split("-")[0])).size;
@@ -1163,7 +1046,7 @@ export default function App() {
   return (
     <div style={{ width:"100vw", height:"100vh", overflow:"hidden", position:"relative", display:"flex", flexDirection:"column", backgroundColor:"#EDEDED" }}>
 
-      <GlobalHeader screen={screen} onToggleScreen={handleToggleScreen} />
+      <GlobalHeader />
 
       <div style={{ flex:1, display:"flex", overflow:"hidden" }}>
         <Sidebar />
@@ -1174,7 +1057,7 @@ export default function App() {
             {/* Title + week picker */}
             <div style={{ height:70, display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24 }}>
               <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:24, color:"black", lineHeight:"30px" }}>
-                {screen === "tabla" ? "Agendamiento flota fija last mile" : "Agendamiento masivo — vista general"}
+                Agendamiento flota fija last mile
               </p>
               <div style={{ display:"flex", alignItems:"center", gap:11, height:48 }}>
                 <div style={{ width:20, height:20, position:"relative", flexShrink:0 }}>
@@ -1232,22 +1115,13 @@ export default function App() {
               </Button>
             </div>
 
-            {/* Tabla — cambia según screen */}
-            {screen === "tabla" ? (
-              <Table
-                rows={displayRows}
-                activeWeeks={activeWeeks} expandedRows={expandedRows}
-                onToggleExpand={toggleExpand} onCellClick={(sc, wn) => { setPanelCtx({ sc, weekNum:wn }); setPanelOpen(true); }}
-                revisadoSet={revisadoSet} agendadoSet={agendadoSet}
-              />
-            ) : (
-              <MasivoTable
-                rows={displayRows}
-                activeWeeks={activeWeeks}
-                onCellClick={(sc, wn) => { setPanelCtx({ sc, weekNum:wn }); setPanelOpen(true); }}
-                revisadoSet={revisadoSet} agendadoSet={agendadoSet}
-              />
-            )}
+            {/* Tabla */}
+            <Table
+              rows={displayRows}
+              activeWeeks={activeWeeks} expandedRows={expandedRows}
+              onToggleExpand={toggleExpand} onCellClick={(sc, wn) => { setPanelCtx({ sc, weekNum:wn }); setPanelOpen(true); }}
+              revisadoSet={revisadoSet} agendadoSet={agendadoSet}
+            />
           </div>
         </div>
       </div>

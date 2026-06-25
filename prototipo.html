@@ -35733,14 +35733,13 @@ function App() {
   const revisadoScCount = new Set([...revisadoSet].map(k => k.split("-")[0])).size;
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      width: 1366,
-      height: 768,
+      width: "100vw",
+      height: "100vh",
       overflow: "hidden",
       position: "relative",
       display: "flex",
       flexDirection: "column",
-      backgroundColor: "#EDEDED",
-      flexShrink: 0
+      backgroundColor: "#EDEDED"
     }
   }, /*#__PURE__*/React.createElement(GlobalHeader, {
     screen: screen,

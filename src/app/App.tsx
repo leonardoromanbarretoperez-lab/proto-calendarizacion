@@ -55,6 +55,29 @@ const STATUS_CFG: Record<string, { bg:string; color:string; label:string }> = {
 const DAYS_HDR   = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
 const CICLO_OPTS = ["AM1","AM2","PM1","PM2"];
 
+const ESTADO_OPTS = ["Sin revisar","Revisado","Agendado"] as const;
+type EstadoOpt = typeof ESTADO_OPTS[number];
+
+const ALL_SVC_CODES = [
+  "SFC6","SSP7","SMS1","SGO1","SBA6","SMG2","SSP39","SBA3","SMG14","SPR5",
+  "SCVDFTES2","SMG18","SRS5","SCE3","SSP17","SSP24","SMG4","SSP12","SSC9","TAT_TEST",
+  "SPI1","RVMG2","SRD1","SSP48","SRJ2","SSP5","SRJ4","SRS2","SBA7","SGO2",
+  "SMR2","SSP34","SSP28","SFC1","SSP20","SMG5","SSP23","SPR6","SSP29","SMG8",
+  "SSP6","SCE1","SSP7_TEST","SMS2","SMG11","SBA2","SSP40","SPR4","RVSP6","SSP4",
+  "SRJ13","SRJ12","SJP1","SAM1","SPR9","SRJ7","SFC4","SSP16","SRN1","SSC7",
+  "SC_ZS","SSP51","SRS3","SSP50","SMG15","SRJ17","SRS8","STO2","SMG13","SSP55",
+  "RJ5","SSC2","SFN1","SSP10","SMG1_TEST","SSP22","SSP49","SSP25","SMG7","SMG12",
+  "SPR3","SSP31","SMG9","SSP5_TEST","SMG6","SSC4","SMN1","SSP8","SRJ10","SSP9",
+  "SMR1","STO1","SBA4","SES3","SPA1","SMG10","SSP11","SSP36","SPR1_TEST","SSP18",
+  "SRD2","RVMG1","SPR1","SSP45","SBA1","SPR2_TEST","SPR7","SSC8","MOR_TEST","SSP46",
+  "SRJ1_TEST","SFC2","SSP14","SMG3","SSC3","SCE2","SAL1","SSP26","SPR11","SFC5",
+  "SFC7","SRJ6","SFC3","SDF2","SPR10","SRS1","SCVDFTES1","SSP3","SSP52","SRS10",
+  "SSP57","SES2","SSP13","SRS4","SBA9","SPR2","SGO3","SRS7","SPA2","SMG1",
+  "SRJ3","SSC1","SSP56","SRJ1","SSP79","SSP38","SSP47","SSP15","SES1","SSP37",
+  "SC_TEST","SRJ9","SRJ8","SPR8","SSP27","SPE1","SSP21","SSP30","SDF1","SRS9",
+  "SSC5","SSE1",
+];
+
 // ─── Layout constants ──────────────────────────────────────────────────────────
 const SC_COL  = 240;
 const TABLE_W = 1200;
@@ -106,6 +129,148 @@ const inputBase: React.CSSProperties = {
   outline: "none",
   boxSizing: "border-box",
 };
+
+// ─── Filter components ────────────────────────────────────────────────────────
+
+function FilterTag({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <div style={{ height:24, borderRadius:56, border:"1.2px solid rgba(0,0,0,0.25)", padding:"0 4px 0 8px", display:"flex", alignItems:"center", gap:2, flexShrink:0, backgroundColor:"white" }}>
+      <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px", whiteSpace:"nowrap" }}>{label}</p>
+      <button onClick={onRemove} style={{ width:16, height:16, background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, flexShrink:0 }}>
+        <svg viewBox="0 0 8.89625 8.89625" fill="none" style={{ width:8, height:8 }}>
+          <path d="M1 1l6.9 6.9M7.9 1L1 7.9" stroke="rgba(0,0,0,0.55)" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+function OverflowPill({ items }: { items: string[] }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div style={{ position:"relative", flexShrink:0 }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      <div style={{ height:24, borderRadius:56, border:"1.2px solid rgba(0,0,0,0.25)", padding:"0 8px", display:"flex", alignItems:"center", cursor:"default", backgroundColor:"white" }}>
+        <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px", whiteSpace:"nowrap" }}>+{items.length}</p>
+      </div>
+      {hover && (
+        <div style={{
+          position:"absolute", top:28, left:0, zIndex:500,
+          backgroundColor:"rgba(0,0,0,0.75)", borderRadius:6,
+          padding:"6px 10px", whiteSpace:"nowrap",
+          boxShadow:"0 2px 8px rgba(0,0,0,0.2)",
+        }}>
+          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"white", lineHeight:"18px" }}>
+            {items.join(", ")}
+          </p>
+          <div style={{ position:"absolute", top:-5, left:10, width:10, height:10, backgroundColor:"rgba(0,0,0,0.75)", transform:"rotate(45deg)", borderRadius:2 }}/>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MultiSelectFilter({ label, open, options, selected, onOpen, onClose, onToggle, onClear, search, onSearch }: {
+  label: string;
+  open: boolean;
+  options: readonly string[];
+  selected: string[];
+  onOpen: () => void;
+  onClose: () => void;
+  onToggle: (opt: string) => void;
+  onClear: () => void;
+  search?: string;
+  onSearch?: (v: string) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const MAX_VISIBLE = 2;
+  const visiblePills = selected.slice(0, MAX_VISIBLE);
+  const overflowPills = selected.slice(MAX_VISIBLE);
+  const filteredOpts = search ? options.filter(o => o.toLowerCase().includes(search.toLowerCase())) : options;
+
+  useEffect(() => {
+    if (!open) return;
+    function h(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) onClose(); }
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [open, onClose]);
+
+  return (
+    <div ref={ref} style={{ display:"flex", alignItems:"center", gap:6, position:"relative" }}>
+      <button onClick={open ? onClose : onOpen} style={{ background:"none", border:"none", cursor:"pointer", padding:0, flexShrink:0 }}>
+        <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"16px" }}>{label}:</p>
+      </button>
+
+      {selected.length === 0 ? (
+        <button onClick={open ? onClose : onOpen} style={{ height:24, borderRadius:56, border:"1.2px solid rgba(0,0,0,0.25)", padding:"0 8px", display:"flex", alignItems:"center", background:"white", cursor:"pointer" }}>
+          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Todos</p>
+        </button>
+      ) : (
+        <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+          {visiblePills.map(item => (
+            <FilterTag key={item} label={item} onRemove={() => onToggle(item)} />
+          ))}
+          {overflowPills.length > 0 && <OverflowPill items={overflowPills} />}
+          <button onClick={onClear} style={{ background:"none", border:"none", cursor:"pointer", padding:"0 2px" }}>
+            <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.45)", lineHeight:"15px" }}>Limpiar</p>
+          </button>
+        </div>
+      )}
+
+      <button onClick={open ? onClose : onOpen} style={{ background:"none", border:"none", cursor:"pointer", padding:0, display:"flex", alignItems:"center" }}>
+        <svg viewBox="0 0 8.2955 4.94324" fill="none" style={{ width:8, height:5, transition:"transform 0.15s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
+          <path d={pickerSvg.p3a87fd80} fill="black" fillOpacity="0.45"/>
+        </svg>
+      </button>
+
+      {open && (
+        <div style={{
+          position:"absolute", top:32, left:0, zIndex:400,
+          backgroundColor:"white", borderRadius:6,
+          boxShadow:"0 6px 16px rgba(0,0,0,0.1)",
+          minWidth:200, maxHeight:320, display:"flex", flexDirection:"column",
+          overflow:"hidden",
+        }}>
+          {onSearch !== undefined && (
+            <div style={{ padding:"8px 8px 4px", flexShrink:0 }}>
+              <input
+                value={search}
+                onChange={e => onSearch(e.target.value)}
+                placeholder="Buscar..."
+                style={{ ...inputBase, width:"100%", height:36, padding:"0 12px", fontSize:14 }}
+                autoFocus
+              />
+            </div>
+          )}
+          <div style={{ overflowY:"auto", flex:1 }}>
+            {filteredOpts.map(opt => (
+              <div key={opt} onClick={() => onToggle(opt)} style={{
+                display:"flex", alignItems:"center", gap:10, padding:"10px 16px",
+                cursor:"pointer", borderBottom:"1px solid #EDEDED", transition:"background 0.1s",
+              }}
+                onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#F7FBFF")}
+                onMouseLeave={e => (e.currentTarget.style.backgroundColor = "white")}
+              >
+                <AndesCheckbox
+                  checked={selected.includes(opt)}
+                  onChange={() => onToggle(opt)}
+                  label={opt}
+                />
+              </div>
+            ))}
+            {filteredOpts.length === 0 && (
+              <div style={{ padding:"12px 16px" }}>
+                <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.45)", lineHeight:"18px" }}>Sin resultados</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── SVG primitives ───────────────────────────────────────────────────────────
 
@@ -332,7 +497,8 @@ function SubRowWeekCell({ weekColW, isLast }: { weekColW:number; isLast:boolean 
 
 // ─── Tabla detallada ──────────────────────────────────────────────────────────
 
-function Table({ activeWeeks, expandedRows, onToggleExpand, onCellClick, revisadoSet, agendadoSet }: {
+function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, revisadoSet, agendadoSet }: {
+  rows: ScRow[];
   activeWeeks: number[];
   expandedRows: Set<string>;
   onToggleExpand: (sc:string) => void;
@@ -360,9 +526,9 @@ function Table({ activeWeeks, expandedRows, onToggleExpand, onCellClick, revisad
         })}
       </div>
 
-      {SC_ROWS.map((row, ri) => {
+      {rows.map((row, ri) => {
         const expanded = expandedRows.has(row.sc);
-        const isLast = ri === SC_ROWS.length - 1;
+        const isLast = ri === rows.length - 1;
         return (
           <div key={row.sc}>
             <div style={{ display:"flex", borderBottom: (!expanded && !isLast) ? "1px solid #EDEDED" : "none" }}>
@@ -434,7 +600,8 @@ function Table({ activeWeeks, expandedRows, onToggleExpand, onCellClick, revisad
 
 // ─── Tabla masivo (compacta, sin expand, con pills siempre visibles) ───────────
 
-function MasivoTable({ activeWeeks, onCellClick, revisadoSet, agendadoSet }: {
+function MasivoTable({ rows, activeWeeks, onCellClick, revisadoSet, agendadoSet }: {
+  rows: ScRow[];
   activeWeeks: number[];
   onCellClick: (sc:string, weekNum:number) => void;
   revisadoSet: Set<string>;
@@ -460,8 +627,8 @@ function MasivoTable({ activeWeeks, onCellClick, revisadoSet, agendadoSet }: {
         })}
       </div>
 
-      {SC_ROWS.map((row, ri) => {
-        const isLast = ri === SC_ROWS.length - 1;
+      {rows.map((row, ri) => {
+        const isLast = ri === rows.length - 1;
         return (
           <div key={row.sc} style={{ display:"flex", borderBottom: isLast ? "none" : "1px solid #EDEDED" }}>
             <div style={{ width:SC_COL, flexShrink:0, height:ROW_H, padding:"0 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"center", backgroundColor:"white" }}>
@@ -900,6 +1067,33 @@ export default function App() {
     return s;
   });
 
+  const [estadoFilter, setEstadoFilter] = useState<EstadoOpt[]>([]);
+  const [svcFilter,    setSvcFilter]    = useState<string[]>([]);
+  const [estadoOpen,   setEstadoOpen]   = useState(false);
+  const [svcOpen,      setSvcOpen]      = useState(false);
+  const [svcSearch,    setSvcSearch]    = useState("");
+
+  const displayRows = React.useMemo(() => {
+    let result = SC_ROWS as ScRow[];
+    if (svcFilter.length > 0) {
+      result = result.filter(r => svcFilter.includes(r.sc));
+    }
+    if (estadoFilter.length > 0) {
+      result = result.filter(r =>
+        activeWeeks.some(wn => {
+          const wi = wn - 1;
+          const key = `${r.sc}-${wn}`;
+          const status: StatusKey = agendadoSet.has(key) ? "agendado" : revisadoSet.has(key) ? "revisado" : r.statuses[wi];
+          if (estadoFilter.includes("Sin revisar") && status === null) return true;
+          if (estadoFilter.includes("Revisado") && status === "revisado") return true;
+          if (estadoFilter.includes("Agendado") && status === "agendado") return true;
+          return false;
+        })
+      );
+    }
+    return result;
+  }, [svcFilter, estadoFilter, activeWeeks, agendadoSet, revisadoSet]);
+
   const [modalSc,         setModalSc]         = useState<string | null>(null);
   const [modalReplicar,   setModalReplicar]   = useState(true);
   const [masivoModal,     setMasivoModal]     = useState(false);
@@ -1010,27 +1204,31 @@ export default function App() {
             </div>
 
             {/* Filter bar */}
-            <div style={{ height:32, display:"flex", alignItems:"center", gap:16, marginBottom:24 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"16px" }}>Estado:</p>
-                <div style={{ height:24, borderRadius:56, border:"1.2px solid rgba(0,0,0,0.25)", padding:"0 8px", display:"flex", alignItems:"center" }}>
-                  <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Todos</p>
-                </div>
-                <svg viewBox="0 0 8.2955 4.94324" fill="none" style={{ width:8, height:5 }}>
-                  <path d={pickerSvg.p3a87fd80} fill="black" fillOpacity="0.25"/>
-                </svg>
-              </div>
-              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"16px" }}>Service centers:</p>
-                <div style={{ height:24, borderRadius:56, border:"1.2px solid rgba(0,0,0,0.25)", padding:"0 8px", display:"flex", alignItems:"center" }}>
-                  <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Todos</p>
-                </div>
-                <svg viewBox="0 0 8.2955 4.94324" fill="none" style={{ width:8, height:5 }}>
-                  <path d={pickerSvg.p3a87fd80} fill="black" fillOpacity="0.25"/>
-                </svg>
-              </div>
+            <div style={{ minHeight:32, display:"flex", alignItems:"center", gap:16, marginBottom:24, flexWrap:"wrap" }}>
+              <MultiSelectFilter
+                label="Estado"
+                open={estadoOpen}
+                options={ESTADO_OPTS}
+                selected={estadoFilter}
+                onOpen={() => { setEstadoOpen(true); setSvcOpen(false); }}
+                onClose={() => setEstadoOpen(false)}
+                onToggle={opt => setEstadoFilter(prev => prev.includes(opt as EstadoOpt) ? prev.filter(x => x !== opt) : [...prev, opt as EstadoOpt])}
+                onClear={() => setEstadoFilter([])}
+              />
+              <MultiSelectFilter
+                label="Service centers"
+                open={svcOpen}
+                options={ALL_SVC_CODES}
+                selected={svcFilter}
+                onOpen={() => { setSvcOpen(true); setEstadoOpen(false); }}
+                onClose={() => setSvcOpen(false)}
+                onToggle={opt => setSvcFilter(prev => prev.includes(opt) ? prev.filter(x => x !== opt) : [...prev, opt])}
+                onClear={() => setSvcFilter([])}
+                search={svcSearch}
+                onSearch={setSvcSearch}
+              />
               <div style={{ flex:1, textAlign:"right" }}>
-                <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.55)", lineHeight:"18px" }}>80 de 108 services centers</p>
+                <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.55)", lineHeight:"18px" }}>{displayRows.length} de {SC_ROWS.length} services centers</p>
               </div>
               <Button hierarchy="loud" size="medium" disabled={!hasRevisado} onClick={() => hasRevisado && setMasivoModal(true)}>
                 Agendar vehículos
@@ -1040,12 +1238,14 @@ export default function App() {
             {/* Tabla — cambia según screen */}
             {screen === "tabla" ? (
               <Table
+                rows={displayRows}
                 activeWeeks={activeWeeks} expandedRows={expandedRows}
                 onToggleExpand={toggleExpand} onCellClick={(sc, wn) => { setPanelCtx({ sc, weekNum:wn }); setPanelOpen(true); }}
                 revisadoSet={revisadoSet} agendadoSet={agendadoSet}
               />
             ) : (
               <MasivoTable
+                rows={displayRows}
                 activeWeeks={activeWeeks}
                 onCellClick={(sc, wn) => { setPanelCtx({ sc, weekNum:wn }); setPanelOpen(true); }}
                 revisadoSet={revisadoSet} agendadoSet={agendadoSet}

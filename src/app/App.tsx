@@ -734,26 +734,25 @@ function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemov
   readOnly?: boolean;
 }) {
   return (
-    <div style={{ display:"flex", flexDirection:"column", gap:12, width:"100%" }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+    <div style={{ border:"1px solid #EDEDED", borderRadius:8, backgroundColor:"white", overflow:"hidden" }}>
+      {/* Card header */}
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"16px 16px 0" }}>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          <div style={{ width:12, height:12, position:"relative", flexShrink:0 }}>
-            <svg viewBox="0 0 8.2955 4.94324" fill="none" style={{ position:"absolute", inset:0, width:"100%", height:"100%" }}>
-              <path d={panelSvg.p2b74ba80} fill="#3483FA"/>
-            </svg>
-          </div>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"20px", whiteSpace:"nowrap" }}>{name}</p>
+          <svg viewBox="0 0 8.2955 4.94324" fill="none" style={{ width:12, height:8, flexShrink:0 }}>
+            <path d={panelSvg.p2b74ba80} fill="#3483FA"/>
+          </svg>
+          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"20px" }}>{name}</p>
         </div>
-        <div style={{ display:"flex" }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:14, color:"#00a650", lineHeight:"18px" }}>{filled}</p>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>/{total} veículos</p>
-        </div>
+        <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>
+          <span style={{ fontWeight:600, color:"#00a650" }}>{filled}</span>/{total} veículos
+        </p>
       </div>
 
-      <div style={{ border:"1px solid #EDEDED", borderRadius:6, overflow:"hidden" }}>
+      {/* Input rows box */}
+      <div style={{ margin:16, border:"1px solid #EDEDED", borderRadius:6, overflow:"hidden" }}>
         {rows.map((row, ri) => (
           <div key={row.id} style={{
-            display:"flex", alignItems:"flex-end", gap:16, padding:"8px 16px",
+            display:"flex", alignItems:"flex-start", gap:16, padding:"8px",
             borderBottom: ri < rows.length-1 ? "1px solid #EDEDED" : "none",
             backgroundColor: readOnly ? "#fafafa" : "white",
           }}>
@@ -792,25 +791,25 @@ function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemov
                 </div>
               ))}
             </div>
-            {!readOnly && ri > 0 ? (
+            {!readOnly && ri > 0 && (
               <button onClick={() => onRemoveRow(row.id)}
-                style={{ background:"none", border:"none", cursor:"pointer", padding:4, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", borderRadius:4, marginBottom:8 }}
+                style={{ background:"none", border:"none", cursor:"pointer", padding:4, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", borderRadius:4, marginTop:28 }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.05)")}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
               >
                 <Trash2 size={16} color="rgba(0,0,0,0.35)" />
               </button>
-            ) : (
-              <div style={{ width:24, flexShrink:0 }} />
             )}
           </div>
         ))}
       </div>
 
       {!readOnly && (
-        <button onClick={onAddRow} style={{ background:"none", border:"none", cursor:"pointer", padding:0, textAlign:"left", alignSelf:"flex-start" }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"#3483FA", lineHeight:"18px" }}>+ Agregar ciclo</p>
-        </button>
+        <div style={{ padding:"0 16px 16px" }}>
+          <button onClick={onAddRow} style={{ background:"none", border:"none", cursor:"pointer", padding:0 }}>
+            <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"#3483FA", lineHeight:"18px" }}>+ Agregar ciclo</p>
+          </button>
+        </div>
       )}
     </div>
   );

@@ -17,6 +17,10 @@ function figmaAssetResolver() {
 }
 
 export default defineConfig({
+  base: '/proto-calendarizacion/',
+  build: {
+    outDir: 'docs',
+  },
   plugins: [
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if

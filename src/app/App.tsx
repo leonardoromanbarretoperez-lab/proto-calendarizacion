@@ -1264,7 +1264,7 @@ export default function App() {
 
       {/* Side panel */}
       <div style={{
-        position:"absolute", top:0, left:PANEL_X, width:PANEL_W, height:"100%",
+        position:"absolute", top:0, right:0, width:PANEL_W, height:"100%",
         transform: panelOpen ? "translateX(0)" : "translateX(100%)",
         transition:"transform 250ms ease-out", zIndex:250, willChange:"transform",
       }}>

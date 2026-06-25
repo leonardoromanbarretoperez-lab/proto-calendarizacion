@@ -5,9 +5,13 @@ import panelSvg from "@/imports/01/svg-a9oovbkrq5";
 import { Button } from "@andes/button";
 import { Pill } from "@andes/badge";
 import { Checkbox as AndesCheckbox } from "@andes/checkbox";
+import { TextField } from "@andes/textfield";
+import { DropdownNative, DropdownNativeItem } from "@andes/dropdown";
 import "@andes/button/index.scss";
 import "@andes/badge/index.scss";
 import "@andes/checkbox/index.scss";
+import "@andes/textfield/index.scss";
+import "@andes/dropdown/index.scss";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -756,28 +760,39 @@ function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemov
 
         {rows.map((row, ri) => (
           <div key={row.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 16px", borderBottom: ri < rows.length-1 ? "1px solid #EDEDED" : "none", backgroundColor: readOnly ? "#fafafa" : "white" }}>
-            <select
-              value={row.ciclo} disabled={readOnly}
-              onChange={e => onRowChange(row.id, { ciclo: e.target.value })}
-              style={{ ...inputBase, width:120, height:40, padding:"0 8px", flexShrink:0, cursor: readOnly ? "not-allowed" : "pointer", backgroundColor: readOnly ? "#f0f0f0" : "white", color: readOnly ? "rgba(0,0,0,0.45)" : "rgba(0,0,0,0.9)" }}
-            >
-              {CICLO_OPTS.map(opt => <option key={opt}>{opt}</option>)}
-            </select>
-            <input
-              type="text" value={row.eta} placeholder="hh:mm" maxLength={5} disabled={readOnly}
-              onChange={e => onRowChange(row.id, { eta: formatEta(e.target.value) })}
-              style={{ ...inputBase, width:96, height:40, padding:"0 12px", flexShrink:0, cursor: readOnly ? "not-allowed" : "text", backgroundColor: readOnly ? "#f0f0f0" : "white", color: readOnly ? "rgba(0,0,0,0.45)" : "rgba(0,0,0,0.9)" }}
-            />
+            <div style={{ width:120, flexShrink:0 }}>
+              <DropdownNative
+                label="Ciclo"
+                value={row.ciclo}
+                disabled={readOnly}
+                onChange={e => onRowChange(row.id, { ciclo: (e.target as HTMLSelectElement).value })}
+              >
+                {CICLO_OPTS.map(opt => <DropdownNativeItem key={opt} value={opt} title={opt} />)}
+              </DropdownNative>
+            </div>
+            <div style={{ width:96, flexShrink:0 }}>
+              <TextField
+                label="ETA"
+                value={row.eta}
+                placeholder="hh:mm"
+                disabled={readOnly}
+                onChange={e => onRowChange(row.id, { eta: formatEta((e.target as HTMLInputElement).value) })}
+              />
+            </div>
             <div style={{ display:"flex", gap:8 }}>
               {DAYS_HDR.map((_, di) => (
-                <input key={di} type="number" min={0} disabled={readOnly} value={row.days[di] ?? 0}
-                  onChange={e => {
-                    const next = [...row.days];
-                    next[di] = Math.max(0, parseInt(e.target.value) || 0);
-                    onRowChange(row.id, { days: next });
-                  }}
-                  style={{ ...inputBase, width:48, height:40, padding:"0 4px", textAlign:"center", cursor: readOnly ? "not-allowed" : "text", backgroundColor: readOnly ? "#f0f0f0" : "white", color: readOnly ? "rgba(0,0,0,0.45)" : "rgba(0,0,0,0.9)" }}
-                />
+                <div key={di} style={{ width:48, flexShrink:0 }}>
+                  <TextField
+                    srLabel={DAYS_HDR[di]}
+                    value={String(row.days[di] ?? 0)}
+                    disabled={readOnly}
+                    onChange={e => {
+                      const next = [...row.days];
+                      next[di] = Math.max(0, parseInt((e.target as HTMLInputElement).value) || 0);
+                      onRowChange(row.id, { days: next });
+                    }}
+                  />
+                </div>
               ))}
             </div>
             {!readOnly && ri > 0 ? (

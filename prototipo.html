@@ -33336,8 +33336,8 @@ const ROW_H   = 80;
 function weekLabel(sel) {
   const s = [...sel].sort((a,b)=>a-b);
   if (!s.length) return "Semana 1 a 4";
-  if (s.length === 1) return \`Semana \${s[0]}\`;
-  return \`Semana \${s[0]} a \${s[s.length-1]}\`;
+  if (s.length === 1) return `Semana ${s[0]}`;
+  return `Semana ${s[0]} a ${s[s.length-1]}`;
 }
 
 function toggleWeek(w, cur) {
@@ -33930,7 +33930,7 @@ function ProgressToast({ label, scCount, done, onClose }) {
   const time = String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0");
   const isMasivo = scCount > 1;
   const loadingText = isMasivo ? "Agendando 100 de 2.132 vehículos" : "Agendando 2 de 276 vehículos";
-  const doneText = isMasivo ? \`2.132 vehículos agendados para \${scCount} Service centers\` : \`168 vehículos agendados para \${label}\`;
+  const doneText = isMasivo ? `2.132 vehículos agendados para ${scCount} Service centers` : `168 vehículos agendados para ${label}`;
 
   return (
     <div style={{ position:"absolute", bottom:0, right:0, width:340, borderRadius:"6px 0 0 0", overflow:"hidden", boxShadow:"0px -2px 16px rgba(0,0,0,0.2)", zIndex:350 }}>
@@ -34246,7 +34246,7 @@ function App() {
     setProgressLabel(label);
     setProgressScCount(scCount);
     setProgressDone(false);
-    if (scCount > 1) setBannerText(\`Se están agendando \${scCount} services centers con flota.\`);
+    if (scCount > 1) setBannerText(`Se están agendando ${scCount} services centers con flota.`);
     setTimeout(() => setProgressDone(true), 3000);
     setTimeout(() => setBannerText(null), 5000);
   }

@@ -1168,8 +1168,8 @@ export default function App() {
       <div style={{ flex:1, display:"flex", overflow:"hidden" }}>
         <Sidebar />
 
-        <div style={{ flex:1, overflow:"hidden" }}>
-          <div style={{ padding:"48px 54px 32px", height:"100%", overflow:"hidden" }}>
+        <div style={{ flex:1, overflow:"auto", backgroundColor:"#EDEDED" }}>
+          <div style={{ maxWidth:1200, margin:"0 auto", padding:"48px 32px 32px" }}>
 
             {/* Title + week picker */}
             <div style={{ height:70, display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24 }}>

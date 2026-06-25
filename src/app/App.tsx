@@ -80,7 +80,6 @@ const ALL_SVC_CODES = [
 
 // ─── Layout constants ──────────────────────────────────────────────────────────
 const SC_COL  = 240;
-const TABLE_W = 1200;
 const PANEL_X = 352;
 const PANEL_W = 1014;
 const ROW_H   = 80;
@@ -480,9 +479,9 @@ function WeekPicker({ draft, onToggle, onApply, onClose }: {
 
 // ─── Sub-row breakdown ────────────────────────────────────────────────────────
 
-function SubRowWeekCell({ weekColW, isLast }: { weekColW:number; isLast:boolean }) {
+function SubRowWeekCell({ isLast }: { isLast:boolean }) {
   return (
-    <div style={{ width:weekColW, flexShrink:0, height:58, padding:"0 24px", borderRight: isLast ? "none" : "1px solid #EDEDED", display:"flex", alignItems:"center", backgroundColor:"#f5f5f5" }}>
+    <div style={{ flex:1, height:58, padding:"0 24px", borderRight: isLast ? "none" : "1px solid #EDEDED", display:"flex", alignItems:"center", backgroundColor:"#f5f5f5" }}>
       <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
         <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>
           <span style={{ fontWeight:600 }}>228</span>{" Small van"}
@@ -507,10 +506,9 @@ function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, r
   agendadoSet: Set<string>;
 }) {
   const numCols = activeWeeks.length;
-  const weekColW = Math.floor((TABLE_W - SC_COL) / numCols);
 
   return (
-    <div style={{ width:TABLE_W, border:"1px solid #EDEDED", borderRadius:"6px 6px 0 0", overflow:"hidden" }}>
+    <div style={{ width:"100%", border:"1px solid #EDEDED", borderRadius:"6px 6px 0 0", overflow:"hidden" }}>
       <div style={{ display:"flex", backgroundColor:"#e5e5e5", borderBottom:"1px solid rgba(0,0,0,0.25)" }}>
         <div style={{ width:SC_COL, flexShrink:0, padding:"10px 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"center", borderTopLeftRadius:6 }}>
           <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px", whiteSpace:"nowrap" }}>Service center</p>
@@ -518,7 +516,7 @@ function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, r
         {activeWeeks.map((wn,i) => {
           const wk = ALL_WEEKS.find(w => w.num === wn)!;
           return (
-            <div key={wn} style={{ width:weekColW, flexShrink:0, padding:"10px 24px", borderRight: i < numCols-1 ? "1px solid #EDEDED" : "none", borderTopRightRadius: i === numCols-1 ? 6 : 0, display:"flex", flexDirection:"column", gap:4, justifyContent:"center" }}>
+            <div key={wn} style={{ flex:1, padding:"10px 24px", borderRight: i < numCols-1 ? "1px solid #EDEDED" : "none", borderTopRightRadius: i === numCols-1 ? 6 : 0, display:"flex", flexDirection:"column", gap:4, justifyContent:"center" }}>
               <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Vehículos semana {wn}</p>
               <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.55)", lineHeight:"15px" }}>{wk.dates}</p>
             </div>
@@ -554,7 +552,7 @@ function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, r
                 const hasInd = row.ind && row.ind.wi === wi;
                 return (
                   <div key={wn} onClick={() => onCellClick(row.sc, wn)} style={{
-                    width:weekColW, flexShrink:0, height:ROW_H, padding:"0 24px",
+                    flex:1, height:ROW_H, padding:"0 24px",
                     borderRight: ci < numCols-1 ? "1px solid #EDEDED" : "none",
                     display:"flex", alignItems:"center", gap:8,
                     backgroundColor:"white", cursor:"pointer", transition:"background 0.1s",
@@ -587,7 +585,7 @@ function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, r
               <div style={{ display:"flex", borderBottom: isLast ? "none" : "1px solid #EDEDED", borderTop:"1px solid #EDEDED" }}>
                 <div style={{ width:SC_COL, flexShrink:0, height:58, borderRight:"1px solid #EDEDED", backgroundColor:"#f5f5f5" }}/>
                 {activeWeeks.map((wn,ci) => (
-                  <SubRowWeekCell key={wn} weekColW={weekColW} isLast={ci === numCols-1}/>
+                  <SubRowWeekCell key={wn} isLast={ci === numCols-1}/>
                 ))}
               </div>
             )}
@@ -608,10 +606,9 @@ function MasivoTable({ rows, activeWeeks, onCellClick, revisadoSet, agendadoSet 
   agendadoSet: Set<string>;
 }) {
   const numCols = activeWeeks.length;
-  const weekColW = Math.floor((TABLE_W - SC_COL) / numCols);
 
   return (
-    <div style={{ width:TABLE_W, border:"1px solid #EDEDED", borderRadius:"6px 6px 0 0", overflow:"hidden" }}>
+    <div style={{ width:"100%", border:"1px solid #EDEDED", borderRadius:"6px 6px 0 0", overflow:"hidden" }}>
       <div style={{ display:"flex", backgroundColor:"#e5e5e5", borderBottom:"1px solid rgba(0,0,0,0.25)" }}>
         <div style={{ width:SC_COL, flexShrink:0, padding:"10px 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"center", borderTopLeftRadius:6 }}>
           <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Service center</p>
@@ -619,7 +616,7 @@ function MasivoTable({ rows, activeWeeks, onCellClick, revisadoSet, agendadoSet 
         {activeWeeks.map((wn,i) => {
           const wk = ALL_WEEKS.find(w => w.num === wn)!;
           return (
-            <div key={wn} style={{ width:weekColW, flexShrink:0, padding:"10px 24px", borderRight: i < numCols-1 ? "1px solid #EDEDED" : "none", borderTopRightRadius: i === numCols-1 ? 6 : 0, display:"flex", flexDirection:"column", gap:4, justifyContent:"center" }}>
+            <div key={wn} style={{ flex:1, padding:"10px 24px", borderRight: i < numCols-1 ? "1px solid #EDEDED" : "none", borderTopRightRadius: i === numCols-1 ? 6 : 0, display:"flex", flexDirection:"column", gap:4, justifyContent:"center" }}>
               <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Semana {wn}</p>
               <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.55)", lineHeight:"15px" }}>{wk.dates}</p>
             </div>
@@ -644,7 +641,7 @@ function MasivoTable({ rows, activeWeeks, onCellClick, revisadoSet, agendadoSet 
 
               return (
                 <div key={wn} onClick={() => onCellClick(row.sc, wn)} style={{
-                  width:weekColW, flexShrink:0, height:ROW_H, padding:"0 24px",
+                  flex:1, height:ROW_H, padding:"0 24px",
                   borderRight: ci < numCols-1 ? "1px solid #EDEDED" : "none",
                   display:"flex", alignItems:"center", gap:8,
                   backgroundColor:"white", cursor:"pointer", transition:"background 0.1s",

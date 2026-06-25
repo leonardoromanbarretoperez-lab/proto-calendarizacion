@@ -1,0 +1,29 @@
+docs/index.html
+  s_f74e19c8689f5b::t_f068db609afa06 13-14
+src/app/App.tsx
+  s_f74e19c8689f5b::t_e9bb5fa30157f7 1092-1110
+  s_f74e19c8689f5b::t_25228db5b361c3 10,16
+  s_f74e19c8689f5b::t_315dbc8b92d7e1 871-876
+docs/assets/index-DO-t-3jp.css
+  s_f74e19c8689f5b::t_f068db609afa06 1
+package-lock.json
+  s_f74e19c8689f5b::t_7cdd3b9c553f09 15,406-422
+docs/assets/index-rJK-ZatR.js
+  s_f74e19c8689f5b::t_f068db609afa06 1,9,17,25,33-38,40,45,50,55,60,65,70,75-76,80-82,86,90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "58733950abd53b1d2e220772f1ea478a00c167d3",
+  "prompts": {},
+  "sessions": {
+    "s_f74e19c8689f5b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "feecad1f-4b5c-436d-85ad-13ad5bb630bc",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "leonardoromanbarretoperez-lab <leonardoroman.barretoperez@mercadolibre.com>"
+    }
+  }
+}

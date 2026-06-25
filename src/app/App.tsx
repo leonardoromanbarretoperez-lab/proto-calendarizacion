@@ -1164,7 +1164,7 @@ export default function App() {
   const revisadoScCount = new Set([...revisadoSet].map(k => k.split("-")[0])).size;
 
   return (
-    <div style={{ width:1366, height:768, overflow:"hidden", position:"relative", display:"flex", flexDirection:"column", backgroundColor:"#EDEDED", flexShrink:0 }}>
+    <div style={{ width:"100vw", height:"100vh", overflow:"hidden", position:"relative", display:"flex", flexDirection:"column", backgroundColor:"#EDEDED" }}>
 
       <GlobalHeader screen={screen} onToggleScreen={handleToggleScreen} />
 

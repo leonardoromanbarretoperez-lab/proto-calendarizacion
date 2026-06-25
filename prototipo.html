@@ -35759,6 +35759,17 @@ function App() {
     style: {
       padding: "48px 54px 32px",
       height: "100%",
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 1200,
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      flex: 1,
       overflow: "hidden"
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -36013,7 +36024,7 @@ function App() {
     },
     revisadoSet: revisadoSet,
     agendadoSet: agendadoSet
-  })))), pickerOpen && /*#__PURE__*/React.createElement(WeekPicker, {
+  }))))), pickerOpen && /*#__PURE__*/React.createElement(WeekPicker, {
     draft: draftWeeks,
     onToggle: w => setDraftWeeks(prev => toggleWeek(w, prev)),
     onApply: () => {

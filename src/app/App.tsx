@@ -7,11 +7,13 @@ import { Pill } from "@andes/badge";
 import { Checkbox as AndesCheckbox } from "@andes/checkbox";
 import { TextField } from "@andes/textfield";
 import { DropdownNative, DropdownNativeItem } from "@andes/dropdown";
+import { Snackbar } from "@andes/snackbar";
 import "@andes/button/index.scss";
 import "@andes/badge/index.scss";
 import "@andes/checkbox/index.scss";
 import "@andes/textfield/index.scss";
 import "@andes/dropdown/index.scss";
+import "@andes/snackbar/index.scss";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -580,19 +582,6 @@ function ConfirmMasivoModal({ weeksLabel, scCount, onConfirm, onCancel }: {
   );
 }
 
-// ─── Green Banner ─────────────────────────────────────────────────────────────
-
-function GreenBanner({ text }: { text: string }) {
-  return (
-    <div style={{
-      position:"absolute", bottom:80, left:"50%", transform:"translateX(-50%)",
-      backgroundColor:"#00a650", borderRadius:6, padding:"16px 24px",
-      boxShadow:"0px 4px 12px rgba(0,0,0,0.15)", zIndex:200, pointerEvents:"none",
-    }}>
-      <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:16, color:"white", lineHeight:"20px", whiteSpace:"nowrap" }}>{text}</p>
-    </div>
-  );
-}
 
 // ─── Confirm Modal ────────────────────────────────────────────────────────────
 
@@ -658,52 +647,6 @@ function ConfirmModal({ sc, weeksLabel, onConfirm, onCancel }: {
   );
 }
 
-// ─── Progress Toast ────────────────────────────────────────────────────────────
-
-function ProgressToast({ label, scCount, done, onClose }: {
-  label: string; scCount: number; done: boolean; onClose: () => void;
-}) {
-  const now = new Date();
-  const time = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
-  const isMasivo = scCount > 1;
-  const loadingText = isMasivo ? "Agendando 100 de 2.132 vehículos" : "Agendando 2 de 276 vehículos";
-  const doneText = isMasivo ? `2.132 vehículos agendados para ${scCount} Service centers` : `168 vehículos agendados para ${label}`;
-
-  return (
-    <>
-      <style>{`@keyframes _spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}._spin{animation:_spin 0.8s linear infinite}`}</style>
-      <div style={{ position:"absolute", bottom:0, right:0, width:340, borderRadius:"6px 0 0 0", overflow:"hidden", boxShadow:"0px -2px 16px rgba(0,0,0,0.2)", zIndex:350 }}>
-        <div style={{ backgroundColor:"rgba(0,0,0,0.9)", height:56, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 16px 0 20px" }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:18, color:"white", lineHeight:"22px" }}>
-            {done ? "Agendamiento finalizado" : "Agendamiento en proceso"}
-          </p>
-          <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", padding:4, display:"flex", alignItems:"center" }}>
-            <svg viewBox="0 0 14.1213 14.1282" fill="none" style={{ width:12, height:12 }}>
-              <path d={panelSvg.p2c2477f0} fill="rgba(255,255,255,0.7)"/>
-            </svg>
-          </button>
-        </div>
-        <div style={{ backgroundColor:"white", padding:"14px 20px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10, flex:1 }}>
-            {done ? (
-              <div style={{ width:16, height:16, borderRadius:"50%", backgroundColor:"#00a650", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                <svg viewBox="0 0 8.78609 6.63369" fill="none" style={{ width:9, height:7 }}>
-                  <path d={panelSvg.p1266fe80} fill="white"/>
-                </svg>
-              </div>
-            ) : (
-              <div className="_spin" style={{ width:16, height:16, borderRadius:"50%", border:"2px solid rgba(52,131,250,0.25)", borderTopColor:"#3483FA", flexShrink:0 }} />
-            )}
-            <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>
-              {done ? doneText : loadingText}
-            </p>
-          </div>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.55)", lineHeight:"15px", flexShrink:0 }}>{time}</p>
-        </div>
-      </div>
-    </>
-  );
-}
 
 // ─── Panel types ──────────────────────────────────────────────────────────────
 
@@ -925,16 +868,12 @@ function Panel({ sc, weekNum, onClose, isRevisado, isAgendado, onMarkRevisado, o
         </div>
       )}
 
-      <div style={{
-        position:"absolute", bottom: isAgendado ? 10 : 90, left:"50%", transform:"translateX(-50%)",
-        width:580, backgroundColor:"#1a1a1a", borderRadius:6, padding:"18px 24px",
-        boxShadow:"0px 6px 16px rgba(0,0,0,0.2)", pointerEvents:"none",
-        transition:"opacity 0.2s ease", opacity: showSnackbar ? 1 : 0,
-      }}>
-        <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:16, color:"white", lineHeight:"20px" }}>
-          Flota de {sc} revisada y lista para agendar.
-        </p>
-      </div>
+      <Snackbar
+        message={`Flota de ${sc} revisada y lista para agendar.`}
+        show={showSnackbar}
+        onClose={() => setShowSnackbar(false)}
+        delay={3000}
+      />
     </div>
   );
 }
@@ -1150,10 +1089,25 @@ export default function App() {
       {masivoModal && (
         <ConfirmMasivoModal weeksLabel={label} scCount={revisadoScCount} onConfirm={handleConfirmMasivo} onCancel={() => setMasivoModal(false)}/>
       )}
-      {bannerText && <GreenBanner text={bannerText}/>}
-      {progressLabel && (
-        <ProgressToast label={progressLabel} scCount={progressScCount} done={progressDone} onClose={() => { setProgressLabel(null); setProgressDone(false); }}/>
-      )}
+      <Snackbar
+        message={bannerText ?? ""}
+        show={!!bannerText}
+        color="positive"
+        onClose={() => setBannerText(null)}
+      />
+      <Snackbar
+        message={
+          progressLabel
+            ? progressDone
+              ? progressScCount > 1 ? `2.132 vehículos agendados para ${progressScCount} Service centers` : `168 vehículos agendados para ${progressLabel}`
+              : progressScCount > 1 ? "Agendando 100 de 2.132 vehículos" : "Agendando 2 de 276 vehículos"
+            : ""
+        }
+        show={!!progressLabel}
+        color={progressDone ? "positive" : undefined}
+        action={{ text: "Cerrar", onClick: () => { setProgressLabel(null); setProgressDone(false); } }}
+        onClose={() => { setProgressLabel(null); setProgressDone(false); }}
+      />
     </div>
   );
 }

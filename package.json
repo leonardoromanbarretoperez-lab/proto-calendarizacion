@@ -12,6 +12,7 @@
     "@andes/button": "^9.6.5",
     "@andes/checkbox": "^9.6.5",
     "@andes/dropdown": "^9.6.5",
+    "@andes/snackbar": "^9.6.5",
     "@andes/textfield": "^9.6.5",
     "@nordic/context": "^9.19.1",
     "@nordic/i18n": "^9.19.1",

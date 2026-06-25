@@ -34362,4 +34362,56 @@ function App() {
               />
             ) : (
               <MasivoTable
-                activeWeeks={ac
+                activeWeeks={activeWeeks}
+                onCellClick={(sc, wn) => { setPanelCtx({ sc, weekNum:wn }); setPanelOpen(true); }}
+                revisadoSet={revisadoSet} agendadoSet={agendadoSet}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {pickerOpen && (
+        <WeekPicker
+          draft={draftWeeks}
+          onToggle={w => setDraftWeeks(prev => toggleWeek(w, prev))}
+          onApply={() => { setActiveWeeks([...draftWeeks].sort((a,b)=>a-b)); setPickerOpen(false); setPanelOpen(false); }}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
+
+      <div style={{
+        position:"absolute", top:0, left:PANEL_X, width:PANEL_W, height:"100%",
+        transform: panelOpen ? "translateX(0)" : "translateX(100%)",
+        transition:"transform 250ms ease-out", zIndex:250, willChange:"transform",
+      }}>
+        <Panel
+          key={panelCtx.sc + "-" + panelCtx.weekNum}
+          sc={panelCtx.sc} weekNum={panelCtx.weekNum}
+          onClose={() => setPanelOpen(false)}
+          isRevisado={revisadoSet.has(panelCtx.sc + "-" + panelCtx.weekNum) && !agendadoSet.has(panelCtx.sc + "-" + panelCtx.weekNum)}
+          isAgendado={agendadoSet.has(panelCtx.sc + "-" + panelCtx.weekNum)}
+          onMarkRevisado={rep => markRevisado(panelCtx.sc, panelCtx.weekNum, rep)}
+          onUnmarkRevisado={rep => unmarkRevisado(panelCtx.sc, panelCtx.weekNum, rep)}
+          onAgendar={rep => { setModalSc(panelCtx.sc); setModalReplicar(rep); }}
+        />
+      </div>
+
+      {modalSc && !masivoModal && (
+        <ConfirmModal sc={modalSc} weeksLabel={label} onConfirm={handleConfirmPerSc} onCancel={() => setModalSc(null)}/>
+      )}
+      {masivoModal && (
+        <ConfirmMasivoModal weeksLabel={label} scCount={revisadoScCount} onConfirm={handleConfirmMasivo} onCancel={() => setMasivoModal(false)}/>
+      )}
+      {bannerText && <GreenBanner text={bannerText}/>}
+      {progressLabel && (
+        <ProgressToast label={progressLabel} scCount={progressScCount} done={progressDone} onClose={() => { setProgressLabel(null); setProgressDone(false); }}/>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

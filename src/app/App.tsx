@@ -469,7 +469,7 @@ function SubRowWeekCell({ isLast }: { isLast:boolean }) {
 
 // ─── Tabla detallada ──────────────────────────────────────────────────────────
 
-function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, revisadoSet, agendadoSet }: {
+function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, revisadoSet, agendadoSet, activeSc, scColRef }: {
   rows: ScRow[];
   activeWeeks: number[];
   expandedRows: Set<string>;
@@ -477,13 +477,15 @@ function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, r
   onCellClick: (sc:string, weekNum:number) => void;
   revisadoSet: Set<string>;
   agendadoSet: Set<string>;
+  activeSc?: string;
+  scColRef?: React.RefObject<HTMLDivElement | null>;
 }) {
   const numCols = activeWeeks.length;
 
   return (
     <div style={{ width:"100%", border:"1px solid #EDEDED", borderRadius:"6px 6px 0 0", overflow:"hidden" }}>
       <div style={{ display:"flex", backgroundColor:"#e5e5e5", borderBottom:"1px solid rgba(0,0,0,0.25)" }}>
-        <div style={{ width:SC_COL, flexShrink:0, padding:"10px 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"center", borderTopLeftRadius:6 }}>
+        <div ref={scColRef} style={{ width:SC_COL, flexShrink:0, padding:"10px 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"center", borderTopLeftRadius:6 }}>
           <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px", whiteSpace:"nowrap" }}>Service center</p>
         </div>
         {activeWeeks.map((wn,i) => {
@@ -503,7 +505,7 @@ function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, r
         return (
           <div key={row.sc}>
             <div style={{ display:"flex", borderBottom: (!expanded && !isLast) ? "1px solid #EDEDED" : "none" }}>
-              <div style={{ width:SC_COL, flexShrink:0, height:ROW_H, padding:"0 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"center", gap:8, backgroundColor:"white" }}>
+              <div style={{ width:SC_COL, flexShrink:0, height:ROW_H, padding:"0 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"center", gap:8, backgroundColor: activeSc === row.sc ? "#EBF2FF" : "white" }}>
                 <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px", flex:1 }}>{row.sc}</p>
                 <button onClick={() => onToggleExpand(row.sc)} style={{
                   background:"none", border:"none", cursor:"pointer", width:20, height:20, padding:0, flexShrink:0,
@@ -940,6 +942,17 @@ export default function App() {
   const [expandedRows,  setExpandedRows]  = useState<Set<string>>(new Set());
   const [panelOpen,     setPanelOpen]     = useState(false);
   const [panelCtx,      setPanelCtx]      = useState({ sc:"STA1", weekNum:1 });
+  const scColRef = useRef<HTMLDivElement>(null);
+  const [panelLeft, setPanelLeft] = useState(0);
+
+  useEffect(() => {
+    const update = () => {
+      if (scColRef.current) setPanelLeft(scColRef.current.getBoundingClientRect().right);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   const [revisadoSet, setRevisadoSet] = useState<Set<string>>(() => {
     const s = new Set<string>();
@@ -1118,8 +1131,10 @@ export default function App() {
             <Table
               rows={displayRows}
               activeWeeks={activeWeeks} expandedRows={expandedRows}
-              onToggleExpand={toggleExpand} onCellClick={(sc, wn) => { setPanelCtx({ sc, weekNum:wn }); setPanelOpen(true); }}
+              onToggleExpand={toggleExpand} onCellClick={(sc, wn) => { if (scColRef.current) setPanelLeft(scColRef.current.getBoundingClientRect().right); setPanelCtx({ sc, weekNum:wn }); setPanelOpen(true); }}
               revisadoSet={revisadoSet} agendadoSet={agendadoSet}
+              activeSc={panelOpen ? panelCtx.sc : undefined}
+              scColRef={scColRef}
             />
           </div>
         </div>
@@ -1137,7 +1152,7 @@ export default function App() {
 
       {/* Side panel */}
       <div style={{
-        position:"absolute", top:0, right:0, width:PANEL_W, height:"100%",
+        position:"absolute", top:56, left:panelLeft, right:0, bottom:0,
         transform: panelOpen ? "translateX(0)" : "translateX(100%)",
         transition:"transform 250ms ease-out", zIndex:250, willChange:"transform",
       }}>

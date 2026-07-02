@@ -485,14 +485,14 @@ function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, r
   return (
     <div style={{ width:"100%", border:"1px solid #EDEDED", borderRadius:"6px 6px 0 0", overflow:"hidden" }}>
       <div style={{ display:"flex", backgroundColor:"#e5e5e5", borderBottom:"1px solid rgba(0,0,0,0.25)" }}>
-        <div ref={scColRef} style={{ width:SC_COL, flexShrink:0, padding:"10px 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"center", borderTopLeftRadius:6 }}>
+        <div ref={scColRef} style={{ width:SC_COL, flexShrink:0, padding:"10px 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"flex-start", flexDirection:"column", justifyContent:"center", borderTopLeftRadius:6 }}>
           <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px", whiteSpace:"nowrap" }}>Service center</p>
         </div>
         {activeWeeks.map((wn,i) => {
           const wk = ALL_WEEKS.find(w => w.num === wn)!;
           return (
-            <div key={wn} style={{ flex:1, padding:"10px 24px", borderRight: i < numCols-1 ? "1px solid #EDEDED" : "none", borderTopRightRadius: i === numCols-1 ? 6 : 0, display:"flex", flexDirection:"column", gap:4, justifyContent:"center" }}>
-              <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Vehículos semana {wn}</p>
+            <div key={wn} style={{ flex:1, padding:"10px 24px", borderRight: i < numCols-1 ? "1px solid #EDEDED" : "none", borderTopRightRadius: i === numCols-1 ? 6 : 0, display:"flex", flexDirection:"column", gap:4, justifyContent:"flex-start" }}>
+              <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Semana {wn}</p>
               <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.55)", lineHeight:"15px" }}>{wk.dates}</p>
             </div>
           );
@@ -1150,8 +1150,15 @@ export default function App() {
         />
       )}
 
+      {/* Overlay: cierra el panel al hacer click fuera */}
+      {panelOpen && (
+        <div onClick={() => setPanelOpen(false)} style={{
+          position:"absolute", inset:0, zIndex:249, cursor:"default",
+        }}/>
+      )}
+
       {/* Side panel */}
-      <div style={{
+      <div onClick={e => e.stopPropagation()} style={{
         position:"absolute", top:56, left:panelLeft, right:0, bottom:0,
         transform: panelOpen ? "translateX(0)" : "translateX(100%)",
         transition:"transform 250ms ease-out", zIndex:250, willChange:"transform",

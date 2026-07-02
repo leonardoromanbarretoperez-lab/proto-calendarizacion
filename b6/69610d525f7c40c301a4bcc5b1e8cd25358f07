@@ -1,0 +1,21 @@
+package-lock.json
+  s_f74e19c8689f5b::t_4565c2f7995867 13,16-23,25-26,28,30-31,104-124,247-268,425-532,552-567,588-606,634-677,702-728,800-851,3212-3229,3320-3342,3395-3410,3449-3462,3490-3514,3527-3538
+package.json
+  s_f74e19c8689f5b::t_b2f88de7948f03 13,16-23,25-26,28,30-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "b669610d525f7c40c301a4bcc5b1e8cd25358f07",
+  "prompts": {},
+  "sessions": {
+    "s_f74e19c8689f5b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "feecad1f-4b5c-436d-85ad-13ad5bb630bc",
+        "model": "unknown"
+      },
+      "human_author": "leonardoromanbarretoperez-lab <leonardoroman.barretoperez@mercadolibre.com>"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+src/app/App.tsx
+  s_f74e19c8689f5b::t_fa1b1dbf64b620 1038-1039,1042
+docs/assets/index-BLKcixSf.js
+  s_f74e19c8689f5b::t_a1b14baa2decbe 9,25,33-34,37-38,40,65,70-72,76,80
+docs/index.html
+  s_f74e19c8689f5b::t_f179d20c36a587 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "c45d8450378c6580eba11ab8d337ccad61c4dc3b",
+  "prompts": {},
+  "sessions": {
+    "s_f74e19c8689f5b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "feecad1f-4b5c-436d-85ad-13ad5bb630bc",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "leonardoromanbarretoperez-lab <leonardoroman.barretoperez@mercadolibre.com>"
+    }
+  }
+}

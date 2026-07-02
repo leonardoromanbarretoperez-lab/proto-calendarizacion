@@ -1035,13 +1035,11 @@ export default function App() {
   function handleConfirmPerSc() {
     if (!modalSc) return;
     const keysToAgendar = modalReplicar
-      ? [...revisadoSet]
-      : activeWeeks.filter(w => revisadoSet.has(`${modalSc}-${w}`)).map(w => `${modalSc}-${w}`);
-    const scCount = modalReplicar ? new Set(keysToAgendar.map(k => k.split("-")[0])).size : 1;
-    const label = modalSc;
+      ? activeWeeks.filter(w => revisadoSet.has(`${modalSc}-${w}`)).map(w => `${modalSc}-${w}`)
+      : [`${modalSc}-${panelCtx.weekNum}`].filter(k => revisadoSet.has(k));
     setModalSc(null);
     setPanelOpen(false);
-    executeAgendar(keysToAgendar, scCount, label);
+    executeAgendar(keysToAgendar, 1, modalSc);
   }
 
   function handleConfirmMasivo() {

@@ -746,7 +746,7 @@ function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemov
           <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"20px" }}>{name}</p>
         </div>
         <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>
-          <span style={{ fontWeight:600, color:"#00a650" }}>{filled}</span>/{total} veículos
+          <span style={{ fontWeight:600, color:"#00a650" }}>{filled}</span>/{total} vehículos
         </p>
       </div>
 

@@ -39,7 +39,7 @@ const SC_ROWS: ScRow[] = [
   { sc: "SFC6",  vals: [266,266,266,266], statuses: [null,null,null,null],                       ind: null },
   { sc: "SMS1",  vals: [267,267,267,267], statuses: ["revisado","revisado","revisado","revisado"], ind: null },
   { sc: "SGO1",  vals: [268,268,268,268], statuses: ["agendado","agendado","agendado","agendado"], ind: null },
-  { sc: "SBA6",  vals: [269,269,500,269], statuses: [null,null,null,null],                       ind: { wi:2, delta:10 } },
+  { sc: "SBA6",  vals: [269,269,279,269], statuses: [null,null,null,null],                       ind: { wi:2, delta:10 } },
   { sc: "SMG2",  vals: [271,271,271,271], statuses: [null,null,null,null],                       ind: null },
   { sc: "SSP39", vals: [271,271,271,271], statuses: [null,null,null,null],                       ind: null },
   { sc: "SBA3",  vals: [180,180,180,180], statuses: ["agendado","agendado","agendado","agendado"], ind: null },

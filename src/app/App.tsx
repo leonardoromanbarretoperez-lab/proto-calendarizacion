@@ -1002,6 +1002,7 @@ export default function App() {
 
   function toggleExpand(sc: string) {
     setExpandedRows(prev => { const n = new Set(prev); n.has(sc) ? n.delete(sc) : n.add(sc); return n; });
+    setPanelOpen(false);
   }
 
   function markRevisado(sc: string, weekNum: number, replicar: boolean) {

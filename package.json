@@ -21,6 +21,7 @@
     "@andes/money-amount": "^9.6.5",
     "@andes/pagination": "^9.6.5",
     "@andes/radio-button": "^9.6.5",
+    "@andes/react": "^2.17.0",
     "@andes/snackbar": "^9.6.5",
     "@andes/switch": "^9.6.5",
     "@andes/table": "^9.6.5",

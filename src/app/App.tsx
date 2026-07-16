@@ -9,6 +9,8 @@ import { TextField } from "@andes/textfield";
 import { DropdownNative, DropdownNativeItem } from "@andes/dropdown";
 import { Snackbar } from "@andes/snackbar";
 import { Tag } from "@andes/tag";
+// @ts-ignore
+import { AndesProvider } from "@andes/context";
 import "@andes/button/index.scss";
 import "@andes/badge/index.scss";
 import "@andes/checkbox/index.scss";
@@ -16,6 +18,265 @@ import "@andes/textfield/index.scss";
 import "@andes/dropdown/index.scss";
 import "@andes/snackbar/index.scss";
 import "@andes/tag/index.scss";
+
+// ─── Andes X imports ──────────────────────────────────────────────────────────
+// @ts-ignore
+import { Button as ButtonX } from "@andes/react/button";
+// @ts-ignore
+import { Checkbox as CheckboxX } from "@andes/react/checkbox";
+// @ts-ignore
+import { TextField as TextFieldX } from "@andes/react/textfield";
+// @ts-ignore
+import { Tag as TagX } from "@andes/react/tag";
+// @ts-ignore
+import { Snackbar as SnackbarX } from "@andes/react/snackbar";
+// @ts-ignore
+import { AndesThemeProvider } from "@andes/react/themes";
+// @ts-ignore
+import { AndesProvider as AndesXProvider } from "@andes/react/context";
+import "@andes/react/styles/button/index.scss";
+import "@andes/react/styles/checkbox/index.scss";
+import "@andes/react/styles/textfield/index.scss";
+import "@andes/react/styles/tag/index.scss";
+import "@andes/react/styles/snackbar/index.scss";
+// @ts-ignore
+import { BadgePill } from "@andes/react/badge";
+// @ts-ignore
+import { Text, Heading } from "@andes/react/typography";
+// @ts-ignore
+import { ConfirmationModal, ModalSlot } from "@andes/react/modal";
+// @ts-ignore
+import { Card } from "@andes/react/card";
+import "@andes/react/styles/badge/index.scss";
+import "@andes/react/styles/typography/index.scss";
+import "@andes/react/styles/modal/index.scss";
+import "@andes/react/styles/card/index.scss";
+// @ts-ignore
+import { DismissButton } from "@andes/react/dismiss-button";
+// @ts-ignore
+import { Textlink } from "@andes/react/textlink";
+// @ts-ignore
+import { Divider } from "@andes/react/divider";
+// @ts-ignore
+import { Dropdown as DropdownX } from "@andes/react/dropdown";
+// @ts-ignore
+import { MenuSingleSelection } from "@andes/react/menu";
+// @ts-ignore
+import { ListRowPick } from "@andes/react/listbox";
+import "@andes/react/styles/dropdown/index.scss";
+import "@andes/react/styles/menu/index.scss";
+import "@andes/react/styles/listbox/index.scss";
+
+// ─── Andes version context ────────────────────────────────────────────────────
+
+const AndesVersionContext = React.createContext<"legacy" | "x">("legacy");
+
+/** Drop-in Button that delegates to legacy or Andes X */
+function AdaptedButton({ hierarchy, size, disabled, onClick, children, fullWidth }: {
+  hierarchy?: string; size?: string; disabled?: boolean;
+  onClick?: () => void; children?: React.ReactNode; fullWidth?: boolean;
+}) {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") return (
+    // @ts-ignore
+    <ButtonX hierarchy={hierarchy} size={size} disabled={disabled} onClick={onClick} fullWidth={fullWidth}>
+      {children}
+    </ButtonX>
+  );
+  return (
+    <Button hierarchy={hierarchy as any} size={size as any} disabled={disabled} onClick={onClick} fullWidth={fullWidth as any}>
+      {children}
+    </Button>
+  );
+}
+
+/** Drop-in Checkbox */
+function AdaptedCheckbox({ checked, onChange, label, disabled }: {
+  checked?: boolean; onChange?: () => void; label?: string; disabled?: boolean;
+}) {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") return (
+    // @ts-ignore
+    <CheckboxX checked={checked} onChange={onChange} label={label} disabled={disabled} />
+  );
+  return <AndesCheckbox checked={checked} onChange={onChange} label={label} disabled={disabled} />;
+}
+
+/** Drop-in TextField */
+function AdaptedTextField({ label, value, placeholder, disabled, onChange }: {
+  label?: string; value?: string | number; placeholder?: string;
+  disabled?: boolean; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") return (
+    // @ts-ignore
+    <TextFieldX label={label} value={value} placeholder={placeholder} disabled={disabled} onChange={onChange} />
+  );
+  return <TextField label={label} value={value as any} placeholder={placeholder} disabled={disabled} onChange={onChange as any} />;
+}
+
+/** Drop-in Tag */
+function AdaptedTag({ label, size, onClose }: {
+  label?: string; size?: string; onClose?: () => void;
+}) {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") return (
+    // @ts-ignore
+    <TagX label={label} size={size} dismissible onDismiss={onClose} />
+  );
+  return <Tag label={label} size={size as any} onClose={onClose} />;
+}
+
+/** Drop-in Snackbar */
+function AdaptedSnackbar({ message, show, color, onClose, action, delay }: {
+  message?: string; show?: boolean; color?: string;
+  onClose?: () => void; action?: { text: string; onClick: () => void }; delay?: number;
+}) {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") return (
+    // @ts-ignore
+    <SnackbarX description={message} visible={show} color={color} onClose={onClose} action={action} delay={delay} />
+  );
+  return <Snackbar message={message} show={show} color={color as any} onClose={onClose} action={action as any} delay={delay} />;
+}
+
+/** Drop-in Pill/Badge — BadgePill uses `label` prop, not children */
+function AdaptedPill({ color, hierarchy, children, style }: {
+  color?: string; hierarchy?: string; children?: React.ReactNode; style?: React.CSSProperties;
+}) {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") return (
+    // @ts-ignore
+    <BadgePill color={color} hierarchy={hierarchy} label={typeof children === "string" ? children : undefined} size="small" />
+  );
+  return <Pill color={color as any} hierarchy={hierarchy as any} style={style}>{children}</Pill>;
+}
+
+// Maps our size tokens to Andes X body/heading type+size
+const ANDESX_SIZE_MAP: Record<string, { type: "body" | "heading"; xSize: string }> = {
+  small:   { type: "body",    xSize: "small"   }, // 12px
+  medium:  { type: "body",    xSize: "medium"  }, // 14px
+  large:   { type: "body",    xSize: "large"   }, // 16px
+  xlarge:  { type: "heading", xSize: "xlarge"  }, // 20px
+  xxlarge: { type: "heading", xSize: "huge"    }, // 24px
+};
+
+/** Drop-in Text (replaces inline-styled <p> tags) */
+function AdaptedText({ size, color, weight, component, children, style }: {
+  size?: string; color?: string; weight?: string;
+  component?: string; children?: React.ReactNode; style?: React.CSSProperties;
+}) {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") {
+    const mapped = ANDESX_SIZE_MAP[size || "medium"] || { type: "body", xSize: "medium" };
+    // heading type: bold by default; body type: "emphasis" for semibold
+    const xWeight = mapped.type === "heading"
+      ? (weight === "semibold" ? "default" : "lean")
+      : (weight === "semibold" ? "emphasis" : "default");
+    if (mapped.type === "heading") {
+      return (
+        // @ts-ignore
+        <Heading component={component || "p"} size={mapped.xSize} color={color || "primary"} weight={xWeight} style={style}>{children}</Heading>
+      );
+    }
+    return (
+      // @ts-ignore
+      <Text component={component || "p"} size={mapped.xSize} color={color || "primary"} weight={xWeight} style={style}>{children}</Text>
+    );
+  }
+  const fontSizeMap: Record<string, number> = { small:12, medium:14, large:16, xlarge:20, xxlarge:24 };
+  const colorMap: Record<string, string> = { primary:"rgba(0,0,0,0.9)", secondary:"rgba(0,0,0,0.55)" };
+  return React.createElement(
+    component || "p",
+    {
+      style: {
+        fontFamily: "'Proxima Nova',sans-serif",
+        fontSize: fontSizeMap[size || "medium"] || 14,
+        color: colorMap[color || "primary"] || color || "rgba(0,0,0,0.9)",
+        fontWeight: weight === "semibold" ? 600 : 400,
+        lineHeight: "1.35",
+        ...style,
+      }
+    },
+    children
+  );
+}
+
+/** Drop-in Card wrapper */
+function AdaptedCard({ children, style }: { children?: React.ReactNode; style?: React.CSSProperties }) {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") return (
+    // @ts-ignore
+    <Card padding="none" appearance="default" style={style}>{children}</Card>
+  );
+  return <div style={{ border:"1px solid #EDEDED", borderRadius:8, backgroundColor:"white", overflow:"hidden", ...style }}>{children}</div>;
+}
+
+function AdaptedDismissButton({ onClick, svgPath, style }: { onClick?: () => void; svgPath?: string; style?: React.CSSProperties }) {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") return (
+    // @ts-ignore
+    <DismissButton onClick={onClick} srLabel="Cerrar" size="small" style={style} />
+  );
+  return (
+    <button onClick={onClick} style={{ background:"none", border:"none", cursor:"pointer", padding:4, flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", ...style }}>
+      {svgPath && (
+        <svg viewBox="0 0 14.1213 14.1282" fill="none" style={{ width:14, height:14 }}>
+          <path d={svgPath} fill="rgba(0,0,0,0.55)"/>
+        </svg>
+      )}
+    </button>
+  );
+}
+
+function AdaptedTextlink({ onClick, children }: { onClick?: () => void; children?: React.ReactNode }) {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") return (
+    // @ts-ignore
+    <Textlink label={typeof children === "string" ? children : String(children)} onClick={onClick} hideArrow size="small" />
+  );
+  return (
+    <button onClick={onClick} style={{ background:"none", border:"none", cursor:"pointer", padding:0 }}>
+      <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"#3483FA", lineHeight:"18px" }}>{children}</p>
+    </button>
+  );
+}
+
+function AdaptedDivider() {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") return (
+    // @ts-ignore
+    <Divider />
+  );
+  return <div style={{ height:1, backgroundColor:"#EDEDED", width:"100%" }} />;
+}
+
+function AdaptedDropdown({ label, value, onChange, options, size }: {
+  label?: string; value?: string; onChange?: (v: string) => void;
+  options: { value: string; label: string }[]; size?: string;
+}) {
+  const v = React.useContext(AndesVersionContext);
+  if (v === "x") return (
+    // @ts-ignore
+    <DropdownX label={label} value={value} onChange={onChange} size={size || "small"}>
+      {/* @ts-ignore */}
+      <MenuSingleSelection srLabel={label || "Seleccionar"}>
+        {options.map(opt => (
+          // @ts-ignore
+          <ListRowPick key={opt.value} value={opt.value}>
+            {/* @ts-ignore */}
+            <Text>{opt.label}</Text>
+          </ListRowPick>
+        ))}
+      </MenuSingleSelection>
+    </DropdownX>
+  );
+  return (
+    <DropdownNative label={label} value={value} onChange={(e: any) => onChange?.(e.target.value)} size={size as any}>
+      {options.map(opt => <DropdownNativeItem key={opt.value} value={opt.value} title={opt.label} />)}
+    </DropdownNative>
+  );
+}
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -33,6 +294,7 @@ interface ScRow {
   vals: number[];
   statuses: StatusKey[];
   ind: { wi: number; delta: number } | null;
+  isXPT?: boolean;
 }
 
 const SC_ROWS: ScRow[] = [
@@ -46,6 +308,9 @@ const SC_ROWS: ScRow[] = [
   { sc: "SMG14", vals: [220,220,220,220], statuses: [null,null,null,null],                       ind: null },
   { sc: "SPR5",  vals: [310,310,310,310], statuses: ["revisado",null,null,null],                 ind: null },
   { sc: "SCE3",  vals: [295,295,295,295], statuses: [null,null,null,null],                       ind: null },
+  { sc: "EPR5",  vals: [142,142,142,142], statuses: [null,null,null,null],                       ind: null, isXPT: true },
+  { sc: "EPR8",  vals: [98,98,98,98],     statuses: [null,null,null,null],                       ind: null, isXPT: true },
+  { sc: "ERJ6",  vals: [115,115,115,115], statuses: [null,null,null,null],                       ind: null, isXPT: true },
 ];
 
 const STATUS_CFG: Record<string, { bg:string; color:string; label:string }> = {
@@ -140,7 +405,7 @@ function OverflowPill({ items }: { items: string[] }) {
       onMouseLeave={() => setHover(false)}
     >
       <div style={{ height:24, borderRadius:56, border:"1.2px solid rgba(0,0,0,0.25)", padding:"0 8px", display:"flex", alignItems:"center", cursor:"default", backgroundColor:"white" }}>
-        <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px", whiteSpace:"nowrap" }}>+{items.length}</p>
+        <AdaptedText component="p" size="small" style={{ whiteSpace:"nowrap" }}>+{items.length}</AdaptedText>
       </div>
       {hover && (
         <div style={{
@@ -149,9 +414,7 @@ function OverflowPill({ items }: { items: string[] }) {
           padding:"6px 10px", whiteSpace:"nowrap",
           boxShadow:"0 2px 8px rgba(0,0,0,0.2)",
         }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"white", lineHeight:"18px" }}>
-            {items.join(", ")}
-          </p>
+          <AdaptedText component="p" size="small" style={{ color:"white" }}>{items.join(", ")}</AdaptedText>
           <div style={{ position:"absolute", top:-5, left:10, width:10, height:10, backgroundColor:"rgba(0,0,0,0.75)", transform:"rotate(45deg)", borderRadius:2 }}/>
         </div>
       )}
@@ -188,17 +451,17 @@ function MultiSelectFilter({ label, open, options, selected, onOpen, onClose, on
   return (
     <div ref={ref} style={{ display:"flex", alignItems:"center", gap:6, position:"relative" }}>
       <button onClick={open ? onClose : onOpen} style={{ background:"none", border:"none", cursor:"pointer", padding:0, flexShrink:0 }}>
-        <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"16px" }}>{label}:</p>
+        <AdaptedText component="p" size="large">{label}:</AdaptedText>
       </button>
 
       {selected.length === 0 ? (
         <button onClick={open ? onClose : onOpen} style={{ height:24, borderRadius:56, border:"1.2px solid rgba(0,0,0,0.25)", padding:"0 8px", display:"flex", alignItems:"center", background:"white", cursor:"pointer" }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Todos</p>
+          <AdaptedText component="p" size="small">Todos</AdaptedText>
         </button>
       ) : (
         <div style={{ display:"flex", alignItems:"center", gap:4 }}>
           {visiblePills.map(item => (
-            <Tag
+            <AdaptedTag
               key={item}
               label={item}
               size="small"
@@ -243,7 +506,7 @@ function MultiSelectFilter({ label, open, options, selected, onOpen, onClose, on
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#F7FBFF")}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = "white")}
               >
-                <AndesCheckbox
+                <AdaptedCheckbox
                   checked={selected.includes(opt)}
                   onChange={() => onToggle(opt)}
                   label={opt}
@@ -252,7 +515,7 @@ function MultiSelectFilter({ label, open, options, selected, onOpen, onClose, on
             ))}
             {filteredOpts.length === 0 && (
               <div style={{ padding:"12px 16px" }}>
-                <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.45)", lineHeight:"18px" }}>Sin resultados</p>
+                <AdaptedText component="p" size="medium" color="secondary">Sin resultados</AdaptedText>
               </div>
             )}
           </div>
@@ -321,8 +584,8 @@ function GlobalHeader() {
 
       <div style={{ display:"flex", flex:"1 0 0", gap:24, alignItems:"center", justifyContent:"flex-end", minWidth:0 }}>
         <div style={{ display:"flex", gap:4, alignItems:"center" }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px", whiteSpace:"nowrap" }}>Está vendo:</p>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px", whiteSpace:"nowrap" }}>MLB</p>
+          <AdaptedText component="p" size="medium" style={{ whiteSpace:"nowrap" }}>Está vendo:</AdaptedText>
+          <AdaptedText component="p" size="medium" weight="semibold" style={{ whiteSpace:"nowrap" }}>MLB</AdaptedText>
           <svg viewBox="0 0 5.29719 8.89358" fill="none" style={{ width:5, height:9 }}>
             <path d={pickerSvg.p9158d80} fill="#3483FA"/>
           </svg>
@@ -333,7 +596,7 @@ function GlobalHeader() {
             <path clipRule="evenodd" d={pickerSvg.p37b72680} fill="black" fillOpacity="0.9" fillRule="evenodd"/>
             <path clipRule="evenodd" d={pickerSvg.p3d60b380} fill="black" fillOpacity="0.9" fillRule="evenodd"/>
           </svg>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>User</p>
+          <AdaptedText component="p" size="medium">User</AdaptedText>
           <svg viewBox="0 0 8.89358 5.29719" fill="none" style={{ width:9, height:5 }}>
             <path d={pickerSvg.p3b187c00} fill="black" fillOpacity="0.9"/>
           </svg>
@@ -398,7 +661,7 @@ function WeekPicker({ draft, onToggle, onApply, onClose }: {
           </svg>
         </button>
         <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"20px" }}>Junio 2026</p>
+          <AdaptedText component="p" size="large">Junio 2026</AdaptedText>
           <svg viewBox="0 0 8.89358 5.29719" fill="none" style={{ width:9, height:5 }}>
             <path d={pickerSvg.p3b187c00} fill="black" fillOpacity="0.55"/>
           </svg>
@@ -413,7 +676,7 @@ function WeekPicker({ draft, onToggle, onApply, onClose }: {
       <div style={{ display:"flex", gap:8, alignItems:"center", paddingLeft:80, paddingBottom:6 }}>
         {DAYS_HDR.map(d => (
           <div key={d} style={{ width:32, textAlign:"center" }}>
-            <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.55)", lineHeight:"15px", textTransform:"uppercase" }}>{d}</p>
+            <AdaptedText component="p" size="small" color="secondary" style={{ textTransform:"uppercase" }}>{d}</AdaptedText>
           </div>
         ))}
       </div>
@@ -434,7 +697,7 @@ function WeekPicker({ draft, onToggle, onApply, onClose }: {
                 {sel && <div style={{ position:"absolute", inset:0, backgroundColor:"rgba(65,137,230,0.1)", borderRadius:16 }}/>}
                 {wk.calDays.map((day,i) => (
                   <div key={day} style={{ position:"absolute", left:i*40, top:0, width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                    <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>{day}</p>
+                    <AdaptedText component="p" size="medium">{day}</AdaptedText>
                   </div>
                 ))}
               </div>
@@ -444,7 +707,7 @@ function WeekPicker({ draft, onToggle, onApply, onClose }: {
       </div>
 
       <div style={{ paddingTop:16, paddingBottom:8 }}>
-        <Button hierarchy="loud" size="large" fullWidth onClick={onApply}>Aplicar</Button>
+        <AdaptedButton hierarchy="loud" size="large" fullWidth onClick={onApply}>Aplicar</AdaptedButton>
       </div>
     </div>
   );
@@ -456,12 +719,8 @@ function SubRowWeekCell({ isLast }: { isLast:boolean }) {
   return (
     <div style={{ flex:1, height:58, padding:"0 24px", borderRight: isLast ? "none" : "1px solid #EDEDED", display:"flex", alignItems:"center", backgroundColor:"#f5f5f5" }}>
       <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-        <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>
-          <span style={{ fontWeight:600 }}>228</span>{" Small van"}
-        </p>
-        <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>
-          <span style={{ fontWeight:600 }}>48</span>{" Large van"}
-        </p>
+        <AdaptedText component="p" size="small"><span style={{ fontWeight:600 }}>228</span>{" Small van"}</AdaptedText>
+        <AdaptedText component="p" size="small"><span style={{ fontWeight:600 }}>48</span>{" Large van"}</AdaptedText>
       </div>
     </div>
   );
@@ -486,14 +745,14 @@ function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, r
     <div style={{ width:"100%", border:"1px solid #EDEDED", borderRadius:"6px 6px 0 0", overflow:"hidden" }}>
       <div style={{ display:"flex", backgroundColor:"#e5e5e5", borderBottom:"1px solid rgba(0,0,0,0.25)" }}>
         <div ref={scColRef} style={{ width:SC_COL, flexShrink:0, padding:"10px 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"flex-start", flexDirection:"column", justifyContent:"center", borderTopLeftRadius:6 }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px", whiteSpace:"nowrap" }}>Service center</p>
+          <AdaptedText component="p" size="small" weight="semibold">Service center</AdaptedText>
         </div>
         {activeWeeks.map((wn,i) => {
           const wk = ALL_WEEKS.find(w => w.num === wn)!;
           return (
             <div key={wn} style={{ flex:1, padding:"10px 24px", borderRight: i < numCols-1 ? "1px solid #EDEDED" : "none", borderTopRightRadius: i === numCols-1 ? 6 : 0, display:"flex", flexDirection:"column", gap:4, justifyContent:"flex-start" }}>
-              <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px" }}>Semana {wn}</p>
-              <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.55)", lineHeight:"15px" }}>{wk.dates}</p>
+              <AdaptedText component="p" size="small" weight="semibold">Semana {wn}</AdaptedText>
+              <AdaptedText component="p" size="small" color="secondary">{wk.dates}</AdaptedText>
             </div>
           );
         })}
@@ -506,7 +765,7 @@ function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, r
           <div key={row.sc}>
             <div style={{ display:"flex", borderBottom: (!expanded && !isLast) ? "1px solid #EDEDED" : "none" }}>
               <div style={{ width:SC_COL, flexShrink:0, height:ROW_H, padding:"0 24px", borderRight:"1px solid #EDEDED", display:"flex", alignItems:"center", gap:8, backgroundColor: activeSc === row.sc ? "#EBF2FF" : "white" }}>
-                <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px", flex:1 }}>{row.sc}</p>
+                <AdaptedText component="p" size="medium" weight="semibold" style={{ flex:1 }}>{row.sc}</AdaptedText>
                 <button onClick={() => onToggleExpand(row.sc)} style={{
                   background:"none", border:"none", cursor:"pointer", width:20, height:20, padding:0, flexShrink:0,
                   display:"flex", alignItems:"center", justifyContent:"center",
@@ -536,20 +795,20 @@ function Table({ rows, activeWeeks, expandedRows, onToggleExpand, onCellClick, r
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = "white")}
                   >
                     <div style={{ display:"flex", alignItems:"center", flex:1 }}>
-                      <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:18, color:"rgba(0,0,0,0.9)", lineHeight:"22px", whiteSpace:"nowrap" }}>{val}</p>
+                      <AdaptedText component="p" size="xlarge" style={{ whiteSpace:"nowrap" }}>{val}</AdaptedText>
                       {hasInd && (
                         <div style={{ display:"flex", alignItems:"center", gap:2, marginLeft:4 }}>
                           <svg viewBox="0 0 10 10" fill="none" style={{ width:10, height:10, transform:"rotate(180deg)" }}>
                             <path clipRule="evenodd" d={panelSvg.p33d7a800} fill="black" fillOpacity="0.55" fillRule="evenodd"/>
                           </svg>
-                          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.55)", lineHeight:"15px" }}>{row.ind!.delta}</p>
+                          <AdaptedText component="p" size="small" color="secondary">{row.ind!.delta}</AdaptedText>
                         </div>
                       )}
                     </div>
                     {status && STATUS_CFG[status] && (
-                      <Pill color={status === "agendado" ? "positive" : "informative"} hierarchy="quiet" style={{ flexShrink:0 }}>
+                      <AdaptedPill color={status === "agendado" ? "positive" : "informative"} hierarchy="quiet">
                         {STATUS_CFG[status].label}
-                      </Pill>
+                      </AdaptedPill>
                     )}
                   </div>
                 );
@@ -605,45 +864,29 @@ function ConfirmMasivoModal({ weeksLabel, scCount, onConfirm, onCancel }: {
         display:"flex", flexDirection:"column", gap:24,
       }}>
         <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between" }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:24, color:"rgba(0,0,0,0.9)", lineHeight:"30px", flex:1 }}>
-            Confirmar agendamiento masivo
-          </p>
-          <button onClick={onCancel} style={{ background:"none", border:"none", cursor:"pointer", padding:4, flexShrink:0, marginLeft:16 }}>
-            <svg viewBox="0 0 14.1213 14.1282" fill="none" style={{ width:14, height:14 }}>
-              <path d={panelSvg.p2c2477f0} fill="rgba(0,0,0,0.55)"/>
-            </svg>
-          </button>
+          <AdaptedText component="p" size="xxlarge" weight="semibold" style={{ flex:1 }}>Confirmar agendamiento masivo</AdaptedText>
+          <AdaptedDismissButton onClick={onCancel} svgPath={panelSvg.p2c2477f0} style={{ marginLeft:16 }} />
         </div>
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"20px" }}>
-            Vas a agendar vehículos para el siguiente periodo:
-          </p>
+          <AdaptedText component="p" size="large">Vas a agendar vehículos para el siguiente periodo:</AdaptedText>
           <div style={{ display:"flex", alignItems:"center", gap:10, height:46, backgroundColor:"rgba(0,0,0,0.04)", borderRadius:6, padding:"0 16px" }}>
             {calendarIcon}
-            <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>
-              {weeksLabel} - 18 de mayo al 16 de junio
-            </p>
+            <AdaptedText component="p" size="medium" weight="semibold">{weeksLabel} - 18 de mayo al 16 de junio</AdaptedText>
           </div>
           <div style={{ display:"flex", gap:12 }}>
             <div style={{ flex:1, display:"flex", alignItems:"center", gap:10, height:46, backgroundColor:"rgba(0,0,0,0.04)", borderRadius:6, padding:"0 16px" }}>
               {truckIcon}
-              <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>
-                <span style={{ fontWeight:600 }}>2.132</span>{" "}
-                <span style={{ color:"rgba(0,0,0,0.55)", fontSize:12 }}>viajes</span>
-              </p>
+              <AdaptedText component="p" size="medium"><span style={{ fontWeight:600 }}>2.132</span>{" "}<span style={{ color:"rgba(0,0,0,0.55)", fontSize:12 }}>viajes</span></AdaptedText>
             </div>
             <div style={{ flex:1, display:"flex", alignItems:"center", gap:10, height:46, backgroundColor:"rgba(0,0,0,0.04)", borderRadius:6, padding:"0 16px" }}>
               {buildingIcon}
-              <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>
-                <span style={{ fontWeight:600 }}>{scCount}</span>{" "}
-                <span style={{ color:"rgba(0,0,0,0.55)", fontSize:12 }}>services centers</span>
-              </p>
+              <AdaptedText component="p" size="medium"><span style={{ fontWeight:600 }}>{scCount}</span>{" "}<span style={{ color:"rgba(0,0,0,0.55)", fontSize:12 }}>services centers</span></AdaptedText>
             </div>
           </div>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <Button hierarchy="loud" size="large" onClick={onConfirm}>Agendar</Button>
-          <Button hierarchy="quiet" size="large" onClick={onCancel}>Volver a revisar</Button>
+          <AdaptedButton hierarchy="loud" size="large" onClick={onConfirm}>Agendar</AdaptedButton>
+          <AdaptedButton hierarchy="quiet" size="large" onClick={onCancel}>Volver a revisar</AdaptedButton>
         </div>
       </div>
     </>
@@ -679,36 +922,23 @@ function ConfirmModal({ sc, weeksLabel, onConfirm, onCancel }: {
         display:"flex", flexDirection:"column", gap:24,
       }}>
         <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between" }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:28, color:"rgba(0,0,0,0.9)", lineHeight:"35px", flex:1 }}>
-            Confirmar agendamiento para {sc}
-          </p>
-          <button onClick={onCancel} style={{ background:"none", border:"none", cursor:"pointer", padding:4, flexShrink:0, marginLeft:16 }}>
-            <svg viewBox="0 0 14.1213 14.1282" fill="none" style={{ width:14, height:14 }}>
-              <path d={panelSvg.p2c2477f0} fill="rgba(0,0,0,0.55)"/>
-            </svg>
-          </button>
+          <AdaptedText component="p" size="xxlarge" weight="semibold" style={{ flex:1 }}>Confirmar agendamiento para {sc}</AdaptedText>
+          <AdaptedDismissButton onClick={onCancel} svgPath={panelSvg.p2c2477f0} style={{ marginLeft:16 }} />
         </div>
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"20px" }}>
-            Vas a agendar vehículos para el siguiente periodo:
-          </p>
+          <AdaptedText component="p" size="large">Vas a agendar vehículos para el siguiente periodo:</AdaptedText>
           <div style={{ display:"flex", alignItems:"center", gap:10, height:46, backgroundColor:"rgba(0,0,0,0.04)", borderRadius:6, padding:"0 16px" }}>
             {calendarIcon}
-            <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"20px" }}>
-              {weeksLabel} - 18 de mayo al 16 de junio
-            </p>
+            <AdaptedText component="p" size="large" weight="semibold">{weeksLabel} - 18 de mayo al 16 de junio</AdaptedText>
           </div>
           <div style={{ display:"flex", alignItems:"center", gap:10, height:46, backgroundColor:"rgba(0,0,0,0.04)", borderRadius:6, padding:"0 16px" }}>
             {truckIcon}
-            <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"20px" }}>
-              <span style={{ fontWeight:600 }}>1.100</span>{" "}
-              <span style={{ color:"rgba(0,0,0,0.55)", fontSize:12 }}>viajes</span>
-            </p>
+            <AdaptedText component="p" size="large"><span style={{ fontWeight:600 }}>1.100</span>{" "}<span style={{ color:"rgba(0,0,0,0.55)", fontSize:12 }}>viajes</span></AdaptedText>
           </div>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <Button hierarchy="loud" size="large" onClick={onConfirm}>Confirmar</Button>
-          <Button hierarchy="quiet" size="large" onClick={onCancel}>Volver a revisar</Button>
+          <AdaptedButton hierarchy="loud" size="large" onClick={onConfirm}>Confirmar</AdaptedButton>
+          <AdaptedButton hierarchy="quiet" size="large" onClick={onCancel}>Volver a revisar</AdaptedButton>
         </div>
       </div>
     </>
@@ -727,27 +957,26 @@ interface CicloRow {
 
 // ─── VehicleCard ──────────────────────────────────────────────────────────────
 
-function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemoveRow, readOnly = false }: {
+function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemoveRow, readOnly = false, isXPT = false }: {
   name: string; total: number; filled: number;
   rows: CicloRow[];
   onRowChange: (id:number, field:Partial<CicloRow>) => void;
   onAddRow: () => void;
   onRemoveRow: (id:number) => void;
   readOnly?: boolean;
+  isXPT?: boolean;
 }) {
   return (
-    <div style={{ border:"1px solid #EDEDED", borderRadius:8, backgroundColor:"white", overflow:"hidden" }}>
+    <AdaptedCard>
       {/* Card header */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"16px 16px 0" }}>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
           <svg viewBox="0 0 8.2955 4.94324" fill="none" style={{ width:12, height:8, flexShrink:0 }}>
             <path d={panelSvg.p2b74ba80} fill="#3483FA"/>
           </svg>
-          <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:16, color:"rgba(0,0,0,0.9)", lineHeight:"20px" }}>{name}</p>
+          <AdaptedText component="p" size="large" weight="semibold">{name}</AdaptedText>
         </div>
-        <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>
-          <span style={{ fontWeight:600, color:"#00a650" }}>{filled}</span>/{total} vehículos
-        </p>
+        <AdaptedText component="p" size="medium"><span style={{ fontWeight:600, color:"#00a650" }}>{filled}</span>/{total} vehículos</AdaptedText>
       </div>
 
       {/* Input rows box */}
@@ -758,18 +987,19 @@ function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemov
             borderBottom: ri < rows.length-1 ? "1px solid #EDEDED" : "none",
             backgroundColor: readOnly ? "#fafafa" : "white",
           }}>
+            {!isXPT && (
+              <div style={{ width:174, flexShrink:0 }}>
+                <AdaptedDropdown
+                  label="Ciclo"
+                  value={row.ciclo}
+                  onChange={v => onRowChange(row.id, { ciclo: v })}
+                  options={CICLO_OPTS.map(o => ({ value: o, label: o }))}
+                  size="small"
+                />
+              </div>
+            )}
             <div style={{ width:174, flexShrink:0 }}>
-              <DropdownNative
-                label="Ciclo"
-                value={row.ciclo}
-                disabled={readOnly}
-                onChange={e => onRowChange(row.id, { ciclo: (e.target as HTMLSelectElement).value })}
-              >
-                {CICLO_OPTS.map(opt => <DropdownNativeItem key={opt} value={opt} title={opt} />)}
-              </DropdownNative>
-            </div>
-            <div style={{ width:174, flexShrink:0 }}>
-              <TextField
+              <AdaptedTextField
                 label="ETA"
                 value={row.eta}
                 placeholder="hh:mm"
@@ -780,7 +1010,7 @@ function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemov
             <div style={{ display:"flex", gap:16 }}>
               {DAYS_HDR.map((d, di) => (
                 <div key={di} style={{ width:54, flexShrink:0 }}>
-                  <TextField
+                  <AdaptedTextField
                     label={d}
                     value={String(row.days[di] ?? 0)}
                     disabled={readOnly}
@@ -808,23 +1038,22 @@ function VehicleCard({ name, total, filled, rows, onRowChange, onAddRow, onRemov
 
       {!readOnly && (
         <div style={{ padding:"0 16px 16px" }}>
-          <button onClick={onAddRow} style={{ background:"none", border:"none", cursor:"pointer", padding:0 }}>
-            <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"#3483FA", lineHeight:"18px" }}>+ Agregar ciclo</p>
-          </button>
+          <AdaptedTextlink onClick={onAddRow}>+ {isXPT ? "Agregar turno" : "Agregar ciclo"}</AdaptedTextlink>
         </div>
       )}
-    </div>
+    </AdaptedCard>
   );
 }
 
 // ─── Panel ────────────────────────────────────────────────────────────────────
 
-function Panel({ sc, weekNum, onClose, isRevisado, isAgendado, onMarkRevisado, onUnmarkRevisado, onAgendar }: {
+function Panel({ sc, weekNum, onClose, isRevisado, isAgendado, onMarkRevisado, onUnmarkRevisado, onAgendar, isXPT = false }: {
   sc: string; weekNum: number; onClose: () => void;
   isRevisado: boolean; isAgendado: boolean;
   onMarkRevisado: (replicar: boolean) => void;
   onUnmarkRevisado: (replicar: boolean) => void;
   onAgendar: (replicar: boolean) => void;
+  isXPT?: boolean;
 }) {
   const wk = ALL_WEEKS.find(w => w.num === weekNum)!;
   const rowIdRef = useRef(2);
@@ -856,6 +1085,10 @@ function Panel({ sc, weekNum, onClose, isRevisado, isAgendado, onMarkRevisado, o
   }
 
 
+  // A row is complete when ETA is filled; for SC (non-XPT) ciclo must also be selected
+  const rowComplete = (row: CicloRow) => !!row.eta && (isXPT || !!row.ciclo);
+  const isComplete = [...largeRows, ...smallRows].every(rowComplete);
+
   const badge = isAgendado
     ? { label:"AGENDADO", bg:"rgba(0,166,80,0.1)", color:"#00a650" }
     : isRevisado
@@ -868,36 +1101,30 @@ function Panel({ sc, weekNum, onClose, isRevisado, isAgendado, onMarkRevisado, o
         <div style={{ padding:"16px 24px", display:"flex", alignItems:"flex-start", justifyContent:"space-between" }}>
           <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
             <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:20, color:"rgba(0,0,0,0.9)", lineHeight:"25px", whiteSpace:"nowrap" }}>
-                Vehículos semana {weekNum} para {sc}
-              </p>
+              <AdaptedText component="p" size="xlarge" weight="semibold">Vehículos semana {weekNum} para {sc}</AdaptedText>
               {badge && (
-                <Pill color={isAgendado ? "positive" : "informative"} hierarchy="quiet" style={{ flexShrink:0 }}>
+                <AdaptedPill color={isAgendado ? "positive" : "informative"} hierarchy="quiet">
                   {badge.label}
-                </Pill>
+                </AdaptedPill>
               )}
             </div>
             <div style={{ display:"flex", alignItems:"center" }}>
-              <span style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>{wk.dates}</span>
-              <span style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>&nbsp;|&nbsp;276&nbsp;</span>
-              <span style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.9)", lineHeight:"18px" }}>vehículos</span>
+              <AdaptedText component="span" size="medium">{wk.dates}</AdaptedText>
+              <AdaptedText component="span" size="medium" weight="semibold">&nbsp;|&nbsp;276&nbsp;</AdaptedText>
+              <AdaptedText component="span" size="medium">vehículos</AdaptedText>
             </div>
           </div>
-          <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", width:28, height:24, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-            <svg viewBox="0 0 14.1213 14.1282" fill="none" style={{ width:14, height:14 }}>
-              <path d={panelSvg.p2c2477f0} fill="#3483FA"/>
-            </svg>
-          </button>
+          <AdaptedDismissButton onClick={onClose} svgPath={panelSvg.p2c2477f0} />
         </div>
       </div>
 
       <div style={{ flex:1, overflowY:"auto", overflowX:"hidden", padding:"24px" }}>
         <div style={{ display:"flex", flexDirection:"column", gap:32 }}>
-          <VehicleCard name="Large van" total={228} filled={228} rows={largeRows} readOnly={isLocked}
+          <VehicleCard name="Large van" total={228} filled={228} rows={largeRows} readOnly={isLocked} isXPT={isXPT}
             onRowChange={(id, f) => updateRow(setLargeRows, id, f)}
             onAddRow={() => addRow(setLargeRows, [38,38,38,38,38,19,19])}
             onRemoveRow={id => removeRow(setLargeRows, id)} />
-          <VehicleCard name="Small van" total={48} filled={48} rows={smallRows} readOnly={isLocked}
+          <VehicleCard name="Small van" total={48} filled={48} rows={smallRows} readOnly={isLocked} isXPT={isXPT}
             onRowChange={(id, f) => updateRow(setSmallRows, id, f)}
             onAddRow={() => addRow(setSmallRows, [8,8,8,8,8,4,4])}
             onRemoveRow={id => removeRow(setSmallRows, id)} />
@@ -908,22 +1135,22 @@ function Panel({ sc, weekNum, onClose, isRevisado, isAgendado, onMarkRevisado, o
         <div style={{ flexShrink:0, height:80, backgroundColor:"white", borderTop:"1px solid #EDEDED", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 48px" }}>
           {isRevisado ? (
             <>
-              <AndesCheckbox checked={replicar} onChange={() => setReplicar(p => !p)} label="Agendar vehículos para todas las semanas revisadas."/>
+              <AdaptedCheckbox checked={replicar} onChange={() => setReplicar(p => !p)} label="Agendar vehículos para todas las semanas revisadas." disabled={!isComplete}/>
               <div style={{ display:"flex", alignItems:"center", gap:16 }}>
-                <Button hierarchy="quiet" size="medium" onClick={() => { onUnmarkRevisado(replicar); setIsDirty(false); }}>Volver a revisar</Button>
-                <Button hierarchy="loud" size="medium" onClick={() => onAgendar(replicar)}>Agendar vehículos</Button>
+                <AdaptedButton hierarchy="quiet" size="medium" disabled={!isComplete} onClick={() => { onUnmarkRevisado(replicar); setIsDirty(false); }}>Volver a revisar</AdaptedButton>
+                <AdaptedButton hierarchy="loud" size="medium" disabled={!isComplete} onClick={() => onAgendar(replicar)}>Agendar vehículos</AdaptedButton>
               </div>
             </>
           ) : (
             <>
-              <AndesCheckbox checked={replicar} onChange={() => { setReplicar(p => !p); setIsDirty(true); }} label="Replicar cambios en las próximas semanas."/>
-              <Button hierarchy="loud" size="medium" disabled={!isDirty} onClick={() => { onMarkRevisado(replicar); setShowSnackbar(true); }}>Marcar como revisado</Button>
+              <AdaptedCheckbox checked={replicar} onChange={() => { setReplicar(p => !p); setIsDirty(true); }} label="Replicar cambios en las próximas semanas." disabled={!isComplete}/>
+              <AdaptedButton hierarchy="loud" size="medium" disabled={!isComplete || !isDirty} onClick={() => { onMarkRevisado(replicar); setShowSnackbar(true); }}>Marcar como revisado</AdaptedButton>
             </>
           )}
         </div>
       )}
 
-      <Snackbar
+      <AdaptedSnackbar
         message={`Flota de ${sc} revisada y lista para agendar.`}
         show={showSnackbar}
         onClose={() => setShowSnackbar(false)}
@@ -936,6 +1163,7 @@ function Panel({ sc, weekNum, onClose, isRevisado, isAgendado, onMarkRevisado, o
 // ─── App ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const [andesVersion, setAndesVersion] = useState<"legacy" | "x">("legacy");
   const [activeWeeks,   setActiveWeeks]   = useState<number[]>([1,2,3,4]);
   const [draftWeeks,    setDraftWeeks]    = useState<Set<number>>(new Set([1,2,3,4]));
   const [pickerOpen,    setPickerOpen]    = useState(false);
@@ -1054,9 +1282,37 @@ export default function App() {
   const hasRevisado = revisadoSet.size > 0;
   const revisadoScCount = new Set([...revisadoSet].map(k => k.split("-")[0])).size;
 
-  return (
-    <div style={{ width:"100vw", height:"100vh", overflow:"hidden", position:"relative", display:"flex", flexDirection:"column", backgroundColor:"#EDEDED" }}>
+  const tabBar = (
+    <div style={{
+      height: 36, flexShrink: 0,
+      backgroundColor: "#1a1a1a",
+      display: "flex", alignItems: "center",
+      padding: "0 16px", gap: 4,
+      zIndex: 300, position: "relative",
+    }}>
+      {(["legacy", "x"] as const).map(v => (
+        <button
+          key={v}
+          onClick={() => setAndesVersion(v)}
+          style={{
+            height: 26, padding: "0 14px",
+            borderRadius: 5, border: "none", cursor: "pointer",
+            fontFamily: "'Proxima Nova', sans-serif",
+            fontSize: 13, fontWeight: andesVersion === v ? 600 : 400,
+            backgroundColor: andesVersion === v ? "white" : "transparent",
+            color: andesVersion === v ? "#1a1a1a" : "rgba(255,255,255,0.7)",
+            transition: "background 0.15s, color 0.15s",
+          }}
+        >
+          {v === "legacy" ? "Andes legacy" : "Andes X"}
+        </button>
+      ))}
+    </div>
+  );
 
+  const appContent = (
+    <div style={{ width:"100vw", height:"100vh", overflow:"hidden", position:"relative", display:"flex", flexDirection:"column", backgroundColor:"#EDEDED" }}>
+      {tabBar}
       <GlobalHeader />
 
       <div style={{ flex:1, display:"flex", overflow:"hidden" }}>
@@ -1067,9 +1323,7 @@ export default function App() {
 
             {/* Title + week picker */}
             <div style={{ height:70, display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24 }}>
-              <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontWeight:600, fontSize:24, color:"black", lineHeight:"30px" }}>
-                Agendamiento flota fija last mile
-              </p>
+              <AdaptedText component="p" size="xxlarge" weight="semibold">Agendamiento flota fija last mile</AdaptedText>
               <div style={{ display:"flex", alignItems:"center", gap:11, height:48 }}>
                 <div style={{ width:20, height:20, position:"relative", flexShrink:0 }}>
                   <svg viewBox="0 0 15.6 15.6" fill="none" style={{ position:"absolute", inset:"11%", width:"78%", height:"78%" }}>
@@ -1077,7 +1331,7 @@ export default function App() {
                   </svg>
                 </div>
                 <div style={{ position:"relative", height:24, display:"flex", alignItems:"center", borderRadius:56, border:"1.2px solid rgba(0,0,0,0.25)", padding:"0 4px 0 8px", gap:2, flexShrink:0 }}>
-                  <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:12, color:"rgba(0,0,0,0.9)", lineHeight:"15px", whiteSpace:"nowrap" }}>{label}</p>
+                  <AdaptedText component="p" size="small" style={{ whiteSpace:"nowrap" }}>{label}</AdaptedText>
                   <button onClick={() => { setActiveWeeks([1,2,3,4]); setPickerOpen(false); setPanelOpen(false); }}
                     style={{ width:16, height:16, background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, flexShrink:0 }}>
                     <svg viewBox="0 0 8.89625 8.89625" fill="none" style={{ width:9, height:9 }}>
@@ -1119,11 +1373,11 @@ export default function App() {
                 onSearch={setSvcSearch}
               />
               <div style={{ flex:1, textAlign:"right" }}>
-                <p style={{ fontFamily:"'Proxima Nova',sans-serif", fontSize:14, color:"rgba(0,0,0,0.55)", lineHeight:"18px" }}>{displayRows.length} de {SC_ROWS.length} services centers</p>
+                <AdaptedText component="p" size="medium" color="secondary">{displayRows.length} de {SC_ROWS.length} services centers</AdaptedText>
               </div>
-              <Button hierarchy="loud" size="medium" disabled={!hasRevisado} onClick={() => hasRevisado && setMasivoModal(true)}>
+              <AdaptedButton hierarchy="loud" size="medium" disabled={!hasRevisado} onClick={() => hasRevisado && setMasivoModal(true)}>
                 Agendar vehículos
-              </Button>
+              </AdaptedButton>
             </div>
 
             {/* Tabla */}
@@ -1158,7 +1412,7 @@ export default function App() {
 
       {/* Side panel */}
       <div onClick={e => e.stopPropagation()} style={{
-        position:"absolute", top:56, left:panelLeft, right:0, bottom:0,
+        position:"absolute", top:92, left:panelLeft, right:0, bottom:0,
         transform: panelOpen ? "translateX(0)" : "translateX(100%)",
         transition:"transform 250ms ease-out", zIndex:250, willChange:"transform",
       }}>
@@ -1171,6 +1425,7 @@ export default function App() {
           onMarkRevisado={rep => markRevisado(panelCtx.sc, panelCtx.weekNum, rep)}
           onUnmarkRevisado={rep => unmarkRevisado(panelCtx.sc, panelCtx.weekNum, rep)}
           onAgendar={rep => { setModalSc(panelCtx.sc); setModalReplicar(rep); }}
+          isXPT={SC_ROWS.find(r => r.sc === panelCtx.sc)?.isXPT ?? false}
         />
       </div>
 
@@ -1180,13 +1435,13 @@ export default function App() {
       {masivoModal && (
         <ConfirmMasivoModal weeksLabel={label} scCount={revisadoScCount} onConfirm={handleConfirmMasivo} onCancel={() => setMasivoModal(false)}/>
       )}
-      <Snackbar
+      <AdaptedSnackbar
         message={bannerText ?? ""}
         show={!!bannerText}
         color="positive"
         onClose={() => setBannerText(null)}
       />
-      <Snackbar
+      <AdaptedSnackbar
         message={
           progressLabel
             ? progressDone
@@ -1200,5 +1455,21 @@ export default function App() {
         onClose={() => { setProgressLabel(null); setProgressDone(false); }}
       />
     </div>
+  );
+
+  return (
+    <AndesProvider locale="es-AR" device={{ type: "desktop" }}>
+      <AndesVersionContext.Provider value={andesVersion}>
+        {andesVersion === "x" ? (
+          // @ts-ignore
+          <AndesXProvider locale="es-AR" device={{ type: "desktop" }}>
+            {/* @ts-ignore */}
+            <AndesThemeProvider>
+              {appContent}
+            </AndesThemeProvider>
+          </AndesXProvider>
+        ) : appContent}
+      </AndesVersionContext.Provider>
+    </AndesProvider>
   );
 }
